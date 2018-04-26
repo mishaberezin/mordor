@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <div style="width:600px;margin:0 auto">
+        <% groupedByAddress.forEach(function(group) { %>
+            <h4><%= group[0].address %></h4>
+            <% group.forEach(function(apt) { %>
+            <table cellpadding=10>
+                <tr style="opacity: <%= apt.double ? 0.3 : 1 %>">
+                    <td><%= apt.phone %></td>
+                    <td><%= apt.price %></td>
+                    <td><%= apt.description %></td>
+                </tr>
+            </table>
+            <% }) %>
+            <hr>
+        <% }) %>
+        </div>
+    </body>
+</html>
