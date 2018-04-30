@@ -1,17 +1,21 @@
 const STOP_WORDS = require('./stop-words');
 
+const filterStopWords = offer => {
+    return !STOP_WORDS.filter(w => {
+        return ~offer.description.toLocaleLowerCase().indexOf(w);
+    }).length;
+};
+
+const filterAgent = offer => !offer.isAgent;
+
 module.exports = data => {
     return new Promise(resolve => {
-        let filtered = data.filter(o => {
-            var res = !STOP_WORDS.filter(w => {
-                return ~o.description.toLocaleLowerCase().indexOf(w);
-            }).length;
+        // let filtered = data.filter(filterStopWords);
 
-            return res;
-        });
+        // console.log(`Total – ${data.length }`)
+        // console.log(`Agents slang free – ${filtered.length}`)
 
-        console.log(`Total – ${data.length }`)
-        console.log(`Agents slang free – ${filtered.length}`)
+        let filtered = data.filter(filterAgent);
 
         resolve(filtered);
     });

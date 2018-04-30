@@ -7,8 +7,7 @@ function getData(page, result) {
     return new Promise(resolve => {
         doRequest(page)
             .then(parsed => {
-                // if (parsed.length < 5) {
-                if (page === 5) {
+                if (parsed.length < 5) {
                     return resolve([...result, ...parsed]);
                 } else {
                     return resolve(new Promise(resolveTimeout => {
@@ -42,6 +41,16 @@ function doRequest(page) {
                     "type":"term",
                     "value":"!1"
                 },
+
+                "maxprice": {
+                    "type": "range",
+                    "value": {"lte": 100000}
+                },
+                "publish_period": {
+                    "type":"term",
+                    "value": 864000
+                },
+
                 "region":{
                     "type":"terms",
                     "value":[1]
@@ -71,28 +80,29 @@ function doRequest(page) {
     })
         .then(res => res.json())
         .then(body => {
-            return body.data.offersSerialized.map((i, o) => {
-                let {
-                    description, bargainTerms: { priceRur },
-                    phones, fullUrl, addedTimestamp, added,
-                    id, user, photos, totalArea
-                } = i;
+            return body.data.offersSerialized
+                .map((i, o) => {
+                    let {
+                        description, bargainTerms: { priceRur },
+                        phones, fullUrl, addedTimestamp, added,
+                        id, user, photos, totalArea, roomsCount
+                    } = i;
 
-                return {
-                    cianId: id, totalArea,
-                    metro: Object(i.geo.undergrounds.filter(u => u.isDefault)[0]).fullName,
-                    photos: photos.slice(0, 3).map(p => p.fullUrl),
-                    ts: addedTimestamp,
-                    description,
-                    price: priceRur,
-                    phone: `${phones[0].countryCode}${phones[0].number}`,
-                    link: fullUrl,
-                    isAgent: user.isAgent,
-                    addressRaw: i.geo.address
-                    .filter(a => a.geoType !== 'district' && a.geoType !== 'underground')
-                    .map(a => a.name).join(' ')
-                };
-            });
+                    return {
+                        cianId: id, totalArea, roomsCount,
+                        metro: Object(i.geo.undergrounds.filter(u => u.isDefault)[0]).fullName,
+                        photos: photos.slice(0, 10).map(p => p.fullUrl),
+                        ts: addedTimestamp,
+                        description,
+                        price: priceRur,
+                        phone: `${phones[0].countryCode}${phones[0].number}`,
+                        link: fullUrl,
+                        isAgent: user.isAgent,
+                        addressRaw: i.geo.address
+                        .filter(a => a.geoType !== 'district' && a.geoType !== 'underground')
+                        .map(a => a.name).join(' ')
+                    };
+                })
         })
 }
 

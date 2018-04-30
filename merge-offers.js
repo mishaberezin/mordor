@@ -3,13 +3,15 @@ module.exports = data => {
         const obj = data.reduce((res, offer) => {
             const key = `${offer.phone}-${offer.address}`.replace(/\s/g, '-');
 
-            if (res[key]) {
-                offer.double = true;
-            } else {
-                res[key] = [];
-            }
+            // if (res[key]) {
+                // offer.double = true;
+            // } else {
+                // res[key] = [];
+            // }
 
-            res[key].push(offer);
+            res[key] = offer;
+
+            // res[key].push(offer);
 
             return res;
         }, {});
