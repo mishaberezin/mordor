@@ -1,10 +1,10 @@
-const STOP_WORDS = require('./stop-words');
+// const STOP_WORDS = require('./stop-words');
 
-const filterStopWords = offer => {
-    return !STOP_WORDS.filter(w => {
-        return ~offer.description.toLocaleLowerCase().indexOf(w);
-    }).length;
-};
+// const filterStopWords = offer => {
+//     return !STOP_WORDS.filter(w => {
+//         return ~offer.description.toLocaleLowerCase().indexOf(w);
+//     }).length;
+// };
 
 const filterAgent = offer => !offer.isAgent;
 

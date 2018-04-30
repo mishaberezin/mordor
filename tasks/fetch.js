@@ -11,7 +11,7 @@ createVkPost(offer);
 return;
 
 cianParser()
-    .then(normalize)
-    .then(merge)
-    .then(filter)
-    .then(write); // Not a Promise
+  .then(normalize)
+  .then(merge)
+  .then(filter)
+  .then(write); // Not a Promise
