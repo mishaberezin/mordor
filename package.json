@@ -1,0 +1,21 @@
+{
+  "name": "apt-finder",
+  "version": "0.0.0",
+  "description": "Программа",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://bitbucket.org/dedimolya/apt-finder.git"
+  },
+  "author": "Dedimolya HTML Team",
+  "license": "UNLICENSED",
+  "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
+  "dependencies": {
+    "lodash": "^4.17.10",
+    "multi-geocoder": "0.1.x",
+    "node-fetch": "2.x"
+  }
+}
