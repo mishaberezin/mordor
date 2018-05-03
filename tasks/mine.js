@@ -15,6 +15,7 @@ Promise.all(
     .then(deduplicate)
     .then(filter)
     .then(base.addOffers)
-    .then(() => {
-        console.log('Ура!');
-    });
+    .then(res => {
+        console.log('Добавлено ' + res.length);
+    })
+    .catch(console.error)
