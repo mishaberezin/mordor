@@ -21,6 +21,7 @@
     "multi-geocoder": "0.1.x",
     "node-fetch": "2.x",
     "request": "^2.85.0",
-    "typograf": "^6.7.2"
+    "typograf": "^6.7.2",
+    "puppeteer": "^1.3.0"
   }
 }
