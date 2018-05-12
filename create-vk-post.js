@@ -1,3 +1,6 @@
+const _ = require('lodash');
+const fs = require('fs');
+const path = require('path');
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 const request = require('request');
@@ -17,7 +20,7 @@ const VK_BASE_Q = `&access_token=${ACCESS_TOKEN}&v=${VK_API_V}`;
 const POST_URL = `${VK_API_URL}wall.post?owner_id=-${GROUP_ID}&from_group=1&${VK_BASE_Q}`;
 
 module.exports = async offer => {
-    const pictures = await uploadPicturesToVk(offer.photos.split(','))
+    const pictures = await uploadPicturesToVk(offer.photos)
         .then(res => res.map(p => `photo${p.owner_id}_${p.id}`).join(','));
 
     const text = await getText(offer);
@@ -27,6 +30,7 @@ module.exports = async offer => {
         method: 'GET'
     })
         .then(res => res.json())
+
         .then(res => {
             console.log(res)
             if (res.response.post_id) {
@@ -71,10 +75,27 @@ const getVkUploadServer = async (groupId, albumId) => {
 
 const uploadPicturesToVk = async links => {
     const vkUploadServer = (await getVkUploadServer(ALBUM_ID, GROUP_ID)).upload_url;
+
+    return Promise.all(
+            _.chunk(links.slice(0, 10), 5).map(chunk => uploadSomePicturesToVk({ links: chunk, vkUploadServer }))
+        )
+        .then(_.flatten)
+        .then(data => {
+            return data;
+        })
+        .catch(console.error);
+};
+
+const uploadSomePicturesToVk = async ({ links, vkUploadServer }) => {
     const form = new FormData();
 
-    links.slice(0, 5).forEach((link, i) => {
-        form.append(`file${i}`, processPicture(request(link)));
+    links.forEach((link, i) => {
+        const ext = path.extname(link);
+        const hasExtHint = ['jpg', 'jpeg', 'png'].includes(ext);
+
+        form.append(`file${i}`, processPicture(request('https://static-maps.yandex.ru/1.x/?l=map&ll=37.310151%2C55.626167&pt=37.310151%2C55.626167%2Chome&z=13&size=600%2C450')), hasExtHint ? {} : {
+            filename: 'file.jpg'
+        });
     });
 
     return fetch(vkUploadServer, { method: 'post', body: form })
@@ -84,7 +105,7 @@ const uploadPicturesToVk = async links => {
                 .then(res => res.json())
                 .then(res => res.response);
         })
-    .catch(console.error)
+        .catch(console.error)
 };
 
 // Adding border, etc.
