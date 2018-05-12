@@ -23,8 +23,6 @@ module.exports = async offer => {
     const text = await getText(offer);
     const url = await getUrl(text, pictures);
 
-    offer.published = true;
-
     return fetch(url, {
         method: 'GET'
     })
