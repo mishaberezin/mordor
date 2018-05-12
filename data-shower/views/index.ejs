@@ -3,20 +3,20 @@
     <head>
     </head>
     <body>
-        <div style="width:600px;margin:0 auto">
-        <% groupedByAddress.forEach(function(group) { %>
-            <h4><%= group[0].address %></h4>
-            <% group.forEach(function(apt) { %>
-            <table cellpadding=10>
-                <tr style="opacity: <%= apt.double ? 0.3 : 1 %>">
-                    <td><%= apt.phone %></td>
-                    <td><%= apt.price %></td>
-                    <td><%= apt.description %></td>
-                </tr>
-            </table>
+        <div style="max-width:1500px;margin:0 auto">
+            <h3>Всего объявлений: <%= data.length %></h3>
+            <% data.forEach(function(apt) { %>
+                <table cellpadding=10 border=1>
+                    <tr>
+                        <td><a href="<%= apt.url %>"><%= Object( apt.address ).normal %></a></td>
+                        <td><%= apt.metro %></td>
+                        <td><%= apt.phone %></td>
+                        <td><%= apt.price %></td>
+                        <td><%= apt.description %></td>
+                        <td><%= String(apt.published) %></td>
+                    </tr>
+                </table>
             <% }) %>
-            <hr>
-        <% }) %>
         </div>
     </body>
 </html>

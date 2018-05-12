@@ -8,18 +8,22 @@ tp.enableRule('*');
 
 const VK_API_URL = 'https://api.vk.com/method/';
 const VK_API_V = '5.74';
-const GROUP_ID = '165699285';
-const ACCESS_TOKEN = 'db51aaf1cb2ac8117f71df92c5a693087c65705eb5eabdb15c5c0484f436e2b21ee07dde2a25d9da676f7';
+// const GROUP_ID = '165699285';
+const GROUP_ID = '166351231';
+const ALBUM_ID = '254084345';
+const ACCESS_TOKEN = '9af0e6f11acbd4e6d71617281943b5d850f29d7cb9c6e217737eafacaf30631a2f6987d60f4ac6190e42c';
 const VK_BASE_Q = `&access_token=${ACCESS_TOKEN}&v=${VK_API_V}`;
 
 const POST_URL = `${VK_API_URL}wall.post?owner_id=-${GROUP_ID}&from_group=1&${VK_BASE_Q}`;
 
 module.exports = async offer => {
-    const pictures = await uploadPicturesToVk(offer.photos)
+    const pictures = await uploadPicturesToVk(offer.photos.split(','))
         .then(res => res.map(p => `photo${p.owner_id}_${p.id}`).join(','));
 
     const text = await getText(offer);
     const url = await getUrl(text, pictures);
+
+    offer.published = true;
 
     return fetch(url, {
         method: 'GET'
@@ -27,16 +31,34 @@ module.exports = async offer => {
         .then(res => res.json())
         .then(res => {
             console.log(res)
+            if (res.response.post_id) {
+                offer.published = true;
+            }
+
+            return offer;
         })
-        .catch(console.error)
+        .catch(err => {
+            console.error(err);
+            process.exit();
+        })
 };
 
 const getText = async offer => {
-    let text = await fixSpelling(offer.description.slice(0, 200)).then(typograf);
-    text = `
-        ${offer.metro} / ${new Intl.NumberFormat('ru-RU').format(offer.price)}₽ \n\n ${offer.roomsCount}-комн. ${offer.totalArea}м²\n ${text}`;
+    let desc = await fixSpelling(offer.description.slice(0, 200)).then(typograf);
 
-    return encodeURIComponent(text + (text.length > 200 ? '…' : '') + `\n\n${offer.link}`);
+    text = `${offer.metro} / ${new Intl.NumberFormat('ru-RU').format(offer.price)}₽`;
+
+    if (offer.roomsCount) {
+        text += `\n\n ${offer.roomsCount}-комн. `
+    }
+
+    if (offer.totalArea) {
+        text += `${offer.totalArea}м²\n`
+    }
+
+    text += `${desc}`;
+
+    return encodeURIComponent(text + (text.length > 200 ? '…' : '') + `\n\n${offer.url}`);
 };
 
 const getUrl = async (text, pictures) => {
@@ -46,11 +68,11 @@ const getUrl = async (text, pictures) => {
 const getVkUploadServer = async (groupId, albumId) => {
     return fetch(`${VK_API_URL}photos.getUploadServer?album_id=${groupId}&group_id=${albumId}${VK_BASE_Q}`)
         .then(res => res.json())
-        .then(res => res.response);
-};
+        .then(res => {
+            return res.response }); };
 
 const uploadPicturesToVk = async links => {
-    const vkUploadServer = (await getVkUploadServer(253337598, GROUP_ID)).upload_url;
+    const vkUploadServer = (await getVkUploadServer(ALBUM_ID, GROUP_ID)).upload_url;
     const form = new FormData();
 
     links.slice(0, 5).forEach((link, i) => {

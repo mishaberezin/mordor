@@ -17,5 +17,9 @@ Promise.all(
     .then(base.addOffers)
     .then(res => {
         console.log('Добавлено ' + res.length);
+        process.exit();
     })
-    .catch(console.error)
+    .catch(err => {
+        console.error(err)
+        process.exit();
+    })

@@ -14,9 +14,12 @@
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
   "dependencies": {
+    "form-data": "^2.3.2",
     "lodash": "^4.17.10",
     "mongoose": "^5.0.17",
     "multi-geocoder": "0.1.x",
-    "node-fetch": "2.x"
+    "node-fetch": "2.x",
+    "request": "^2.85.0",
+    "typograf": "^6.7.2"
   }
 }
