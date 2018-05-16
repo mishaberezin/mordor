@@ -1,25 +1,17 @@
-// Загружает, фильтрует и кладет в базу свежие офферы.
-
-const _ = require('lodash');
-
-const providers = require('../lib/providers');
-const normalize = require('../lib/normalize');
-const deduplicate = require('../lib/deduplicate');
+const mine = require('../lib/mine');
+const fixup = require('../lib/fixup');
+const dedup = require('../lib/dedup');
 const filter = require('../lib/filter');
-const base = require('../lib/base');
+const db = require('../lib/db');
 
-Promise.all(
-        providers.map(provider => provider().then(normalize))
-    )
-    .then(_.flatten)
-    .then(deduplicate)
-    .then(filter)
-    .then(base.addOffers)
+mine()
+    .then(fixup) // Нормализация и добавление производных данных
+    .then(dedup) // Удаляем дубли
+    .then(filter) // Оставляем подходящие по цене и другим параметрам
+    .then(offers => db.addOffers(offers))
     .then(res => {
-        console.log('Добавлено ' + res.length);
-        process.exit();
-    })
-    .catch(err => {
-        console.error(err)
-        process.exit();
+        console.error('Объявления добавлены');
+    });
+    .catch(() => {
+        console.error('Что-то пошло не так');
     });
