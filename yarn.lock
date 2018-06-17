@@ -88,6 +88,12 @@ bson@~1.0.4, bson@~1.0.5:
   version "1.0.6"
   resolved "http://storage.mds.yandex.net/get-npm/66641/bson-1.0.6.tgz#444db59ddd4c24f0cb063aabdc5c8c7b0ceca912"
 
+canvas@^1.6.11:
+  version "1.6.11"
+  resolved "https://registry.yarnpkg.com/canvas/-/canvas-1.6.11.tgz#c2d8bcf283281f19ded14fa163a111804522330d"
+  dependencies:
+    nan "^2.10.0"
+
 caseless@~0.12.0:
   version "0.12.0"
   resolved "http://storage.mds.yandex.net/get-npm/66641/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
@@ -472,6 +478,10 @@ multi-geocoder@0.1.x:
     vow "^0.4.10"
     vow-queue "^0.4.2"
 
+nan@^2.10.0:
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
+
 node-fetch@2.x:
   version "2.1.2"
   resolved "http://storage.mds.yandex.net/get-npm/66641/node-fetch-2.1.2.tgz#ab884e8e7e57e38a944753cec706f788d1768bb5"
@@ -479,6 +489,10 @@ node-fetch@2.x:
 oauth-sign@~0.8.2:
   version "0.8.2"
   resolved "http://storage.mds.yandex.net/get-npm/45674/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
+
+"ocrad.js@https://github.com/antimatter15/ocrad.js":
+  version "0.1.0"
+  resolved "https://github.com/antimatter15/ocrad.js#abae4b3b5fc1f3c96317db6c725a9861a4002e56"
 
 once@^1.3.0:
   version "1.4.0"
