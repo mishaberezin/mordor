@@ -4,6 +4,12 @@
 const createVkPost = require('../lib/create-vk-post');
 const db = require('../lib/db');
 
+function delay(time) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, time)
+    });
+}
+
 (async () => {
     const offers = await db.getOffers({ published: false });
     if (!offers.length) {
@@ -11,25 +17,27 @@ const db = require('../lib/db');
         process.exit();
     }
 
-    const queue = offers.map(async offer => {
-        try {
-            const post = await createVkPost(offer);
-            if (!post) {
-                throw new Error(`Не смог создать пост с ${offer.uniqueKey}`);
-            }
+    const processOffer = async offer => {
+        const post = await createVkPost(offer);
 
-            return db.updateOffers({ _id: offer._id }, { published: true });
-        } catch(e) {
-            console.error(e);
-            process.exit();
+        if (!post) {
+            return false;
+            // throw new Error(`Не смог создать пост с ${offer.uniqueKey}`);
         }
-    });
 
-    for (step of queue) {
-        await step;
+        return db.updateOffers({ _id: offer._id }, { published: true });
+    };
+
+    let offersCount = offers.length;
+    let results = [];
+
+    for (let i = 0; i < offersCount; i++) {
+        const res = await processOffer(offers[i]);
+
+        results.push(res);
     }
 
-    console.log('Запостил!');
+    console.log(`Запостил! ${results.filter(Boolean).length} из ${offersCount}`);
 
     process.exit();
 })()
