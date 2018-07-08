@@ -4,6 +4,7 @@
   "description": "Программа",
   "main": "index.js",
   "scripts": {
+    "preinstall": "bash ./scripts/preinstall.sh",
     "mine": "node ./tasks/mine",
     "post": "node ./tasks/post"
   },
