@@ -6,7 +6,8 @@
   "scripts": {
     "preinstall": "bash ./scripts/preinstall.sh",
     "mine": "node ./tasks/mine",
-    "post": "node ./tasks/post"
+    "post": "node ./tasks/post",
+    "start": "node ./tasks/start"
   },
   "repository": {
     "type": "git",
@@ -16,15 +17,15 @@
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
   "dependencies": {
-    "canvas": "^1.6.11",
-    "config": "^1.30.0",
+    "config": "1.x",
+    "bluebird": "3.x",
     "form-data": "^2.3.2",
     "lodash": "^4.17.10",
     "mongoose": "^5.0.17",
     "multi-geocoder": "0.1.x",
     "node-fetch": "2.x",
     "ocrad.js": "https://github.com/antimatter15/ocrad.js",
-    "puppeteer": "^1.3.0",
+    "puppeteer": "^1.6.0",
     "request": "^2.85.0",
     "typograf": "^6.7.2"
   }
