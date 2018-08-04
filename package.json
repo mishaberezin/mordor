@@ -18,8 +18,11 @@
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
   "dependencies": {
-    "config": "1.x",
     "bluebird": "3.x",
+    "body-parser": "^1.18.3",
+    "canvas": "^1.6.11",
+    "config": "1.x",
+    "express": "^4.16.3",
     "form-data": "^2.3.2",
     "lodash": "^4.17.10",
     "mongoose": "^5.0.17",
@@ -27,6 +30,7 @@
     "node-fetch": "2.x",
     "ocrad.js": "https://github.com/antimatter15/ocrad.js",
     "puppeteer": "^1.6.0",
+    "raven": "^2.6.3",
     "request": "^2.85.0",
     "typograf": "^6.7.2"
   }
