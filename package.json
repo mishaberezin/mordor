@@ -7,7 +7,8 @@
     "preinstall": "bash ./scripts/preinstall.sh",
     "mine": "node ./tasks/mine",
     "post": "node ./tasks/post",
-    "start": "node ./tasks/start"
+    "start": "node ./tasks/start",
+    "mine-shops": "node ./tasks/mine-shops"
   },
   "repository": {
     "type": "git",

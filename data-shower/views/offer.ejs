@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .container {
+            width: 1000px;
+            margin: 0 auto;
+        }
+
+        .offer__photos {
+            font-size: 0;
+        }
+
+        .offer__photos img {
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        h1 span {
+            font-weight: normal;
+        }
+
+        .offer__info {
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .offer__near {
+            width: 50%;
+        }
+
+        .offer__desc {
+            width: 45%;
+        }
+
+        .place {
+            padding: 6px 0;
+            font-size: 12px;
+        }
+
+        .place__subname {
+            opacity: .5;
+        }
+
+        .offer__near h3 {
+            margin: 0 0 10px;
+        }
+
+        .places__col {
+            width: 47%;
+        }
+
+        .places__col-wrap {
+            display: flex;
+            justify-content: space-between
+        }
+
+    </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1><%= offer.price %>₽ / <%= offer.metro %>, <span><%= offer.roomsCount %>-комн., <%= offer.totalArea %>м2</span></h1>
+            <div class="offer__photos">
+                <% offer.photos.forEach(function(p) { %>
+                    <img src="<%= p %>" />
+                <% }) %>
+            </div>
+            <div class="offer__info">
+                <div class="offer__desc">
+                    <div><%= offer.address.normal %></div>
+                    <div><%= offer.description %></div>
+                </div>
+                <div class="offer__near places">
+                    <h3>Рядом:</h3>
+                    <div class="places__col-wrap">
+                        <div class="places__col">
+                            <% places.slice(0, places.length/2).forEach(function(p) { %>
+                            <div class="place">
+                                <b><%= p.title %></b>
+                                <span class="place__subname"><%= p.type %></span>
+                                <%= p.timeText %>&nbsp;<span class="place__subname"><%= p.distanceText %></span>
+                            </div>
+                            <% }) %>
+                        </div>
+                        <div class="places__col">
+                            <% places.slice(places.length/2).forEach(function(p) { %>
+                            <div class="place">
+                                <b><%= p.title %></b>
+                                <span class="place__subname"><%= p.type %></span>
+                                <%= p.timeText %>&nbsp;<span class="place__subname"><%= p.distanceText %></span>
+                            </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+

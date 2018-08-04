@@ -1,21 +1,80 @@
 <!DOCTYPE html>
 <html>
     <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .container {
+            width: 1000px;
+            margin: 0 auto;
+        }
+
+        .offer {
+            display: flex;
+            width: 100%;
+            padding: 20px 0;
+            text-decoration: none;
+            color: #000;
+            border-radius: 3px;
+        }
+
+        .offer:hover {
+            background: rgba(0,0,0,.1);
+        }
+
+        .offer > div {
+            display: inline-block;
+            padding: 0 8px;
+        }
+
+        .offer .offer__photos {
+            flex-shrink: 0;
+            width: 180px;
+            font-size: 0;
+            padding: 0;
+        }
+
+        .offer .offer__address {
+            width: 150px;
+            white-space: no-wrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0
+        }
+
+        .offer__photos img {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+
+    </style>
     </head>
     <body>
-        <div style="max-width:1500px;margin:0 auto">
-            <h3>Всего объявлений: <%= data.length %></h3>
-            <% data.forEach(function(apt) { %>
-                <table cellpadding=10 border=1>
-                    <tr>
-                        <td><a href="<%= apt.url %>"><%= Object( apt.address ).normal %></a></td>
-                        <td><%= apt.metro %></td>
-                        <td><%= apt.phone %></td>
-                        <td><%= apt.price %></td>
-                        <td><%= apt.description %></td>
-                        <td><%= String(apt.published) %></td>
-                    </tr>
-                </table>
+        <div class="container">
+            <h3>Всего объявлений: <%= offers.length %></h3>
+
+            <% offers.forEach(function(o) { %>
+                <a class="offer" href="/<%= o._id %>">
+                    <div class="offer__photos">
+                        <% o.photos.forEach(function(p) { %>
+                                <img src="<%= p %>" />
+                        <% }) %>
+                    </div>
+                    <div class="offer__address">
+                        <div><b><%= o.price %></b></div>
+                        <div><%= o.metro %></div>
+                    </div>
+                    <div class="offer__desc">
+                        <div> <%= o.description %> </div>
+                    </div>
+                    <!-- <div><%= JSON.stringify(o, null, 4) %></div> -->
+                </a>
             <% }) %>
         </div>
     </body>
