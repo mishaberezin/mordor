@@ -4,7 +4,7 @@
   "description": "Программа",
   "main": "index.js",
   "scripts": {
-    "preinstall": "bash ./scripts/preinstall.sh",
+    "preinstall": "# bash ./scripts/preinstall.sh",
     "mine": "node ./tasks/mine",
     "post": "node ./tasks/post",
     "start": "node ./tasks/start",
@@ -29,7 +29,7 @@
     "multi-geocoder": "0.1.x",
     "node-fetch": "2.x",
     "ocrad.js": "https://github.com/antimatter15/ocrad.js",
-    "puppeteer": "^1.6.0",
+    "puppeteer": "^1.7.0",
     "raven": "^2.6.3",
     "request": "^2.85.0",
     "typograf": "^6.7.2"

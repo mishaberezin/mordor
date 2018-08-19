@@ -3,3 +3,6 @@ data
 
 .DS_Store
 yarn-error.log
+
+# Editors
+.vscode
