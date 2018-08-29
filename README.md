@@ -4,18 +4,16 @@ Apt-Finder
 Инсталейшон
 -----------
 
-🤪 Node.js ≥ 10
+🤪 Node.js ≥ 10 (NPM6)
 
 Mac
 ```
 brew install pkg-config cairo libpng jpeg giflib
+npm ci
 ```
 
 Ubuntu
 ```
 sudo apt-get install libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev build-essential g++
-```
-
-```
-yarn
+npm ci
 ```
