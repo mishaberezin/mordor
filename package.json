@@ -2,19 +2,18 @@
   "name": "apt-finder",
   "version": "0.0.0",
   "description": "Программа",
+  "author": "Dedimolya HTML Team",
   "main": "index.js",
   "scripts": {
     "preinstall": "# bash ./scripts/preinstall.sh",
-    "mine": "node ./tasks/mine",
-    "post": "node ./tasks/post",
-    "start": "node ./tasks/start",
-    "mine-shops": "node ./tasks/mine-shops"
+    "mine": "node ./scripts/mine",
+    "start": "node ./scripts/start",
+    "mine-shops": "node ./scripts/mine-shops"
   },
   "repository": {
     "type": "git",
     "url": "git+https://bitbucket.org/dedimolya/apt-finder.git"
   },
-  "author": "Dedimolya HTML Team",
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
   "dependencies": {
