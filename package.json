@@ -6,8 +6,8 @@
   "main": "index.js",
   "scripts": {
     "preinstall": "# bash ./scripts/preinstall.sh",
-    "mine": "node ./scripts/mine",
-    "start": "node ./scripts/start",
+    "mine": "node ./miners/index.js",
+    "start": "node ./server/index.js",
     "mine-shops": "node ./scripts/mine-shops"
   },
   "repository": {
@@ -17,6 +17,7 @@
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
   "dependencies": {
+    "@sentry/node": "^4.0.3",
     "bluebird": "3.x",
     "body-parser": "^1.18.3",
     "canvas": "^1.6.11",
@@ -29,8 +30,8 @@
     "node-fetch": "2.x",
     "ocrad.js": "https://github.com/antimatter15/ocrad.js",
     "puppeteer": "^1.7.0",
-    "raven": "^2.6.3",
     "request": "^2.85.0",
     "typograf": "^6.7.2"
-  }
+  },
+  "private": true
 }
