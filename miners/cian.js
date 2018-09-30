@@ -107,7 +107,7 @@ async function getOffersByDistrict(page, districtId, pageNumber = 1) {
 }
 
 async function addOffers(offers) {
-    await fetch('http://localhost:3000/offers/add', {
+    await fetch('http://localhost:3000/offer', {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ offers })
