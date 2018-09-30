@@ -14,7 +14,7 @@ const app = express();
 // Sentry requestHandler must be the 1st middleware
 app.use(Sentry.Handlers.requestHandler());
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb', extended: true }));
 
 // Sentry errorHandler must be before any other error middleware
 app.use(Sentry.Handlers.errorHandler());
