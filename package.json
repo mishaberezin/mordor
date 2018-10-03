@@ -1,9 +1,9 @@
 {
   "name": "apt-finder",
   "version": "0.0.0",
-  "description": "Программа",
+  "private": true,
+  "description": "Программа для ЭВМ",
   "author": "Dedimolya HTML Team",
-  "main": "index.js",
   "scripts": {
     "preinstall": "# bash ./scripts/preinstall.sh",
     "mine": "node ./miners/index.js",
@@ -18,7 +18,7 @@
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
   "dependencies": {
-    "@sentry/node": "^4.0.3",
+    "@sentry/node": "^4.0.6",
     "bluebird": "3.x",
     "body-parser": "^1.18.3",
     "canvas": "^1.6.11",
@@ -26,13 +26,15 @@
     "express": "^4.16.3",
     "form-data": "^2.3.2",
     "lodash": "^4.17.10",
-    "mongoose": "^5.0.17",
+    "mongoose": "^5.3.1",
     "multi-geocoder": "0.1.x",
     "node-fetch": "2.x",
-    "ocrad.js": "https://github.com/antimatter15/ocrad.js",
+    "ocrad.js": "git+https://github.com/antimatter15/ocrad.js.git",
     "puppeteer": "^1.7.0",
     "request": "^2.85.0",
     "typograf": "^6.7.2"
   },
-  "private": true
+  "devDependencies": {
+    "nodemon": "^1.18.4"
+  }
 }
