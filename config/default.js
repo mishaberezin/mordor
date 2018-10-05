@@ -1,4 +1,11 @@
 module.exports = {
+    db: {
+        host: 'localhost',
+        user: '',
+        pass: ''
+    },
+    
+
     cian: {
         username: 'ubiquitous-bassoon@ya.ru',
         password: 'dWJpcXVpdG91cy1iYXNzb29u'
