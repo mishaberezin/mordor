@@ -95,8 +95,14 @@ async function getOffersByDistrict(page, districtId, pageNumber = 1) {
 
     if (pageUrlParam !== pageNumber) return false;
 
-    let offers = (await page.evaluate(() => window.__serp_data__.results.offers).catch(console.error))
-        .map(getDataFromOffer);
+    let offers = (await page.evaluate(() => {
+        if(window.__serp_data__) {
+            return window.__serp_data__.results.offers;
+        }
+        
+        return [];
+    }).catch(console.error))
+    .map(getDataFromOffer);
 
     console.log('districtId: ' + districtId, 'pageNumber: ' + pageNumber);
 
