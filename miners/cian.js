@@ -20,7 +20,7 @@ async function getDistrictsIds(page) {
     return fetch('https://www.cian.ru/api/geo/get-districts-tree/?locationId=1')
         .then(res => res.json())
         .then(res => res.map(d => d.id))
-        .catch(console.error)
+        .catch(e => process.exit(1))
 }
 
 async function run() {
@@ -95,7 +95,10 @@ async function getOffersByDistrict(page, districtId, pageNumber = 1) {
 
     if (pageUrlParam !== pageNumber) return false;
 
-    let offers = (await page.evaluate(() => window.__serp_data__.results.offers).catch(console.error))
+    let offers = (await page.evaluate(() => window.__serp_data__.results.offers).catch(e => {
+        console.error(e);
+        process.exit(1)
+    }))
         .map(getDataFromOffer);
 
     console.log('districtId: ' + districtId, 'pageNumber: ' + pageNumber);
