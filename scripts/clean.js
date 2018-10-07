@@ -3,7 +3,8 @@
 const db = require('../lib/db');
 
 const clean = async () => {
-    const offers = db.getOffers({status: 'active'})
+    const offers = await db.getOffers({status: 'active'})
+    console.log(offers.length)
 };
 
 clean();
