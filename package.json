@@ -34,7 +34,5 @@
     "request": "^2.85.0",
     "typograf": "^6.7.2"
   },
-  "devDependencies": {
-    "nodemon": "^1.18.4"
-  }
+  "devDependencies": {}
 }

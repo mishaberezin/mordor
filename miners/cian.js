@@ -1,5 +1,5 @@
+const config = require('config');
 const shuffle = require('lodash/shuffle');
-const config = require('config').get('cian');
 const puppeteer = require('puppeteer');
 const fetch = require('node-fetch');
 
@@ -60,19 +60,6 @@ async function run() {
         waitUntil: 'domcontentloaded'
     });
 
-    // Логинимся
-    await waitAndClick(selectors.actionButton);
-    await delay(2000);
-    await waitAndClick(selectors.usernameWrap);
-    await page.keyboard.type(config.username, { delay: 30 });
-    await waitAndClick(selectors.passwordWrap);
-    await page.keyboard.type(config.password, { delay: 30 });
-    await waitAndClick(selectors.submitButton);
-
-    await page.waitForNavigation({
-        waitUntil: 'networkidle0'
-    });
-
     const neverend = function * (arr) {
         for(let i = 0; true; i = (i + 1) % arr.length) {
             yield arr[i];
@@ -95,14 +82,14 @@ async function getOffersByDistrict(page, districtId, pageNumber = 1) {
 
     if (pageUrlParam !== pageNumber) return false;
 
-    let offers = (await page.evaluate(() => {
-        if(window.__serp_data__) {
+    let offers = await page.evaluate(() => {
             return window.__serp_data__.results.offers;
-        }
-        
-        return [];
-    }).catch(console.error))
-    .map(getDataFromOffer);
+        })
+        .catch(err => {
+            console.error(err);
+            return [];
+        })
+        .map(getDataFromOffer);
 
     console.log('districtId: ' + districtId, 'pageNumber: ' + pageNumber);
 
@@ -113,7 +100,7 @@ async function getOffersByDistrict(page, districtId, pageNumber = 1) {
 }
 
 async function addOffers(offers) {
-    await fetch('http://localhost:3000/offer', {
+    await fetch(`${config.get('api.host')}/offer`, {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ offers })
@@ -129,7 +116,7 @@ const getDataFromOffer = offer => {
     } = offer;
 
     return {
-        sourceId: 'cian',
+        source: 'cian',
         offerId: String(offer.cianId),
         totalArea,
         roomsCount,
@@ -143,8 +130,8 @@ const getDataFromOffer = offer => {
         url: fullUrl,
         isAgent: Object(user).isAgent,
         addressRaw: (offer.geo.address || [])
-        .filter(a => a.geoType !== 'district' && a.geoType !== 'underground')
-        .map(a => a.name).join(' ')
+            .filter(a => a.geoType !== 'district' && a.geoType !== 'underground')
+            .map(a => a.name).join(' ')
     }
 };
 

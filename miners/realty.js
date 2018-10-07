@@ -1,46 +1,28 @@
+const config = require('config');
 const puppeteer = require('puppeteer');
 const range = require('lodash/range');
 const shuffle = require('lodash/shuffle');
-const config = require('config').get('realty');
 const fetch = require('node-fetch');
 
 const selectors = {
-    loginButton: '.LoginButton',
-    usernameInput: '.passport-Input input[name=login]',
-    passwordInput: '.passport-Input input[name=passwd]',
-    passportSubmitButton: '.passport-Domik-Form-Field button[type=submit]',
-    notNowExtraPhoneButton: '.request-phone_back-button button',
-    notNowExtraEmailButton: '.request-email_back-button .button2',
-
-    heatMapsPopupCloseButton: '.heatmaps-popup__close-button',
-    subscriptionWizardCloseButton: '.subscription-wizard__close-button',
-
     districtsPopupOpenButton: '.FiltersFormField__refinements-selector .Link:nth-child(2)',
     rentalMenuItem: '.NavMenuItem[href^="/moskva/snyat/kvartira/"]',
     extraFilters: '.FiltersFormField_section_extra .Link',
-
     regionsContainer: '.b-geoselector-refinement_type_sub-localities',
-
     offerLinks: '.serp-item__offer-link, .OffersSerpItem__generalInfo .OffersSerpItem__link',
-
-    pagerNextArrow: '.Pager__next-arrow, .pager .icon_type_next',
-
-    noOffersBanner: '.OffersSerpNotFound',
-
     address: '.offer-card__address',
     roomsCount: '.offer-card__feature_name_rooms-total .offer-card__feature-value',
-    isStudio: '.offer-card__feature_name_studio .offer-card__feature-value',
-
+    isStudio: '.offer-card__feature_name_studio .offer-card__feature-value'
 }
 
-class RealtyBot {
+class Robot {
     constructor() {
         return this.init();
     }
 
     async init() {
         const browser = await puppeteer.launch({
-            // headless: false,
+            headless: false,
             defaultViewport: null,
             args: [
                 '--disable-infobars',
@@ -69,10 +51,7 @@ class RealtyBot {
                     setTimeout(fix, 100);
                 } else {
                     document.getElementById('f1xed') || document.head.insertAdjacentHTML('beforeend', [
-                        '<style id="f1xed">',
-                        '.subscription-wizard, .popup__under_type_paranja',
-                        '{ display: none; }',
-                        '</style>'
+                        '<style id="f1xed">.subscription-wizard, .popup__under_type_paranja { display: none } </style>'
                     ].join('\n'));
                 }
             })();
@@ -83,14 +62,49 @@ class RealtyBot {
             waitUntil: 'domcontentloaded'
         });
 
-        // Экономим траффик
+        // Фильтруем траффик для экономии
         await mainPage.setRequestInterception(true);
 
         mainPage.on('request', request => {
             const requestUrl = new URL(request.url());
-            const whiteList = ['ysa-static.passport.yandex.ru'];
+            const blackList = [
+                /^https:\/\/mc\.yandex\.ru/,
+                /^https:\/\/static-maps\.yandex\.ru/,
+                /^https:\/\/realty\.yandex\.ru\/manifest\.json/,
+                /^https:\/\/analytics\.twitter\.com/,
+                /^https:\/\/platform\.twitter\.com/,
+                /^https:\/\/www\.facebook\.com/,
+                /^https:\/\/yandex\.ru\/set\/s\/rsya-tag-users/,
+                /^https:\/\/www\.googleadservices\.com/,
+                /^https:\/\/googleads\.g\.doubleclick\.net/,
+                /^https:\/\/wcm\.solution\.weborama\.fr/,
+                /^https:\/\/connect\.facebook\.net/,
+                /^https:\/\/.+\.criteo\.[^.]+\//,
+                /\.ico$/,
+                /^https:\/\/yastatic\.net\/s3\/vertis-frontend/,
+                /^https:\/\/ads\.adfox\.ru/,
+                /^https:\/\/an\.yandex\.ru\/partner-code-bundles/,
+                /^https:\/\/yastatic\.net\/pcode\/adfox\/loader\.js/,
+                /^https:\/\/awaps\.yandex\.net/,
+                /^https:\/\/google-analytics\.com/,
+                /^https:\/\/unpkg\.com/,
+                /^https:\/\/yastatic\.net\/realty2\/_\/fCbpL9c4MT8kkdZmRcV0QC80VNw\.png/,
+                /^https:\/\/yastatic\.net\/q\/set\/s\/rsya-tag-users/,
+                /^https:\/\/an\.yandex\.ru/,
+                /^https:\/\/static-mon\.yandex\.net/,
+                /^https:\/\/www\.googletagmanager\.com/,
+                /^https:\/\/static\.ads-twitter\.com/,
+                /^https:\/\/.+\.mail\.ru\//
+            ];
+            const whiteList = [
+                /^https:\/\/ysa-static\.passport\.yandex\.ru/
+            ];
+            const url = request.url();
+            const shortUrl = request.url().slice(0, 200);
 
-            if(whiteList.includes(requestUrl.host)) {
+            if(blackList.some(re => re.test(url))) {
+                request.abort();
+            } else if(whiteList.some(re => re.test(url))) {
                 request.continue();
             } else if(['image', 'font'].includes(request.resourceType())) {
                 request.abort();
@@ -99,31 +113,11 @@ class RealtyBot {
             }
         });
 
-        // Логинимся
-        await waitAndClick(selectors.loginButton);
-        await waitAndClick(selectors.usernameInput);
-        await mainPage.keyboard.type(config.username, { delay: 30 });
-        await waitAndClick(selectors.passwordInput);
-        await mainPage.keyboard.type(config.password, { delay: 30 });
-        
-        const backToRealtyNavigationPromise = mainPage.waitForNavigation({
-            timeout: 3000
-        });
-
-        await waitAndClick(selectors.passportSubmitButton);
-
-        // Если паспортная форма зависла после отправки или появился баннер с просьбой добавить телефон,
-        // то переход на realty.yandex.ru не сработает, но т.к. мы уже залогинились, форсим переход сами.
-        await backToRealtyNavigationPromise.catch(() => mainPage.goto('https://realty.yandex.ru/', {
-            waitUntil: 'domcontentloaded'
-        }));
-
         // Переходим по ссылке "Аренда" в меню
         await waitAndClick(selectors.rentalMenuItem);
 
-        // Выдача по всем объявлениям заканчивается на 20й странице )
-        // поэтому объявления приходится загружать частями, пер риджион.
-        // Список всех регионов получаем из поисковых фильтров.
+        // Общая выдача заканчивается на 20й странице, поэтому загружаем частями.
+        // Список регионов получаем из поисковых фильтров.
         await waitAndClick(selectors.extraFilters);
         await waitAndClick(selectors.districtsPopupOpenButton);
         await mainPage.waitForSelector(selectors.regionsContainer);
@@ -140,6 +134,10 @@ class RealtyBot {
         this.regions = shuffle(regions);
 
         return this;
+    }
+
+    async stop() {
+        return this.browser.close();
     }
 
     async * offers() {
@@ -215,11 +213,48 @@ class RealtyBot {
                         const isStudioElem = document.querySelector(isStudio);
 
                         return {
-                            href: location.href,
-                            address: document.querySelector(address).textContent,
+                            url: location.href,
+                            addressRaw: document.querySelector(address).textContent,
                             roomsCount: roomsCountElem ? roomsCountElem.textContent : isStudioElem ? 0 : null,
                         }
                     }, selectors);
+
+                    Object.assign(data, {
+                        source: 'realty',
+                        addressRaw
+                    })
+
+                    const getDataFromOffer = offer => {
+                        let {
+                            description,
+                            bargainTerms: { priceRur },
+                            phones, fullUrl, addedTimestamp, added,
+                            id, user, photos, totalArea, roomsCount, floorNumber
+                        } = offer;
+                    
+                        return {
+                            sourceId: 'cian',
+                            totalArea,
+                            roomsCount,
+                            floor: floorNumber,
+                            metro: Object(offer.geo.undergrounds.filter(u => u.isDefault)[0]).fullName,
+                            photos: photos.map(p => p.fullUrl),
+                            parsedTimestamp: (Date.now() / 1000).toFixed(0, 10),
+                            description,
+                            price: priceRur,
+                            phone: `${phones[0].countryCode}${phones[0].number}`,
+                            url: fullUrl,
+                            isAgent: Object(user).isAgent,
+                            addressRaw: (offer.geo.address || [])
+                                .filter(a => a.geoType !== 'district' && a.geoType !== 'underground')
+                                .map(a => a.name).join(' ')
+                        }
+                    };
+
+
+
+
+
 
                     await offerPage.close();
 
@@ -230,22 +265,26 @@ class RealtyBot {
     }
 }
 
-async function addOffer(offer) {
-    await fetch('http://localhost:3000/offers/add', {
+async function postOffer(offer) {
+    await fetch(`${config.get('api.host')}/offer`, {
         method: 'post',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({ offers: [offer] })
     });
 }
 
 async function run() {
-    const robot = await new RealtyBot();
+    const robot = await new Robot();
 
     for await (const offer of robot.offers()) {
-        await addOffer(offer);
-        console.log('УРА!');
+        await postOffer(offer);
+        await robot.stop();
+        console.log('GOOD BYE!!!');
+        return;
     }
 }
 
 module.exports = run;
-
+module.parent || run(); // Вызвали напрямую

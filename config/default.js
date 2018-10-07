@@ -1,17 +1,12 @@
 module.exports = {
     db: {
+        href: 'mongodb://robot:e3fbocIK4pqvJzr7@localhost/apt-finder?authSource=admin',
         host: 'localhost',
-        user: '',
-        pass: ''
+        name: 'apt-finder',
+        user: 'robot',
+        pass: 'e3fbocIK4pqvJzr7'
     },
-    
-
-    cian: {
-        username: 'ubiquitous-bassoon@ya.ru',
-        password: 'dWJpcXVpdG91cy1iYXNzb29u'
-    },
-    realty: {
-        username: 'improved-octo-system@ya.ru',
-        password: 'aW1wcm92ZWQtb2N0by1zeXN0ZW0',
+    api: {
+        host: 'http://localhost:3000'
     }
 }
