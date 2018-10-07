@@ -1,7 +1,7 @@
+const puppeteer = require('puppeteer');
 const range = require('lodash/range');
 const shuffle = require('lodash/shuffle');
 const config = require('config').get('realty');
-const puppeteer = require('puppeteer');
 const fetch = require('node-fetch');
 
 const selectors = {
@@ -248,3 +248,4 @@ async function run() {
 }
 
 module.exports = run;
+
