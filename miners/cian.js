@@ -131,6 +131,7 @@ const getDataFromOffer = offer => {
     return {
         sourceId: 'cian',
         offerId: String(offer.cianId),
+        status: 'active',
         totalArea,
         roomsCount,
         floor: floorNumber,
