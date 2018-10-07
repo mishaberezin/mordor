@@ -118,6 +118,7 @@ const getDataFromOffer = offer => {
     return {
         source: 'cian',
         offerId: String(offer.cianId),
+        status: 'active',
         totalArea,
         roomsCount,
         floor: floorNumber,
