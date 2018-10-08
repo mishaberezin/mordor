@@ -116,13 +116,12 @@ const getDataFromOffer = offer => {
     } = offer;
 
     return {
-        source: 'cian',
+        sourceId: 'cian',
         offerId: String(offer.cianId),
         status: 'active',
         totalArea,
         roomsCount,
         floor: floorNumber,
-        metro: Object(offer.geo.undergrounds.filter(u => u.isDefault)[0]).fullName,
         photos: photos.map(p => p.fullUrl),
         parsedTimestamp: (Date.now() / 1000).toFixed(0, 10),
         description,

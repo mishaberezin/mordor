@@ -216,45 +216,20 @@ class Robot {
                             url: location.href,
                             addressRaw: document.querySelector(address).textContent,
                             roomsCount: roomsCountElem ? roomsCountElem.textContent : isStudioElem ? 0 : null,
+                            totalArea: null,
+                            floor: null,
+                            photos: null,
+                            parsedTimestamp: (Date.now() / 1000).toFixed(0, 10),
+                            description: null,
+                            price: null,
+                            phone: null,
+                            isAgent: null
                         }
                     }, selectors);
 
                     Object.assign(data, {
-                        source: 'realty',
-                        addressRaw
-                    })
-
-                    const getDataFromOffer = offer => {
-                        let {
-                            description,
-                            bargainTerms: { priceRur },
-                            phones, fullUrl, addedTimestamp, added,
-                            id, user, photos, totalArea, roomsCount, floorNumber
-                        } = offer;
-                    
-                        return {
-                            sourceId: 'cian',
-                            totalArea,
-                            roomsCount,
-                            floor: floorNumber,
-                            metro: Object(offer.geo.undergrounds.filter(u => u.isDefault)[0]).fullName,
-                            photos: photos.map(p => p.fullUrl),
-                            parsedTimestamp: (Date.now() / 1000).toFixed(0, 10),
-                            description,
-                            price: priceRur,
-                            phone: `${phones[0].countryCode}${phones[0].number}`,
-                            url: fullUrl,
-                            isAgent: Object(user).isAgent,
-                            addressRaw: (offer.geo.address || [])
-                                .filter(a => a.geoType !== 'district' && a.geoType !== 'underground')
-                                .map(a => a.name).join(' ')
-                        }
-                    };
-
-
-
-
-
+                        sourceId: 'realty'
+                    });
 
                     await offerPage.close();
 
