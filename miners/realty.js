@@ -241,10 +241,10 @@ class Robot {
 }
 
 async function postOffer(offer) {
-    await fetch(`${config.get('api.host')}/offer`, {
+    await fetch(`${config.get('api.url')}/offer`, {
         method: 'post',
-        headers: { 
-            'Content-Type': 'application/json' 
+        headers: {
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({ offers: [offer] })
     });
@@ -262,4 +262,3 @@ async function run() {
 }
 
 module.exports = run;
-module.parent || run(); // Вызвали напрямую

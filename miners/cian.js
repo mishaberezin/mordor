@@ -11,9 +11,7 @@ const selectors = {
 }
 
 function delay(time) {
-    return new Promise(function (resolve) {
-        setTimeout(resolve, time)
-    });
+    return new Promise(resolve => setTimeout(resolve, time));
 }
 
 async function getDistrictsIds(page) {
@@ -27,7 +25,7 @@ async function run() {
     const districts = shuffle(await getDistrictsIds());
 
     const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         defaultViewport: null,
         args: [
             '--disable-infobars',
@@ -89,7 +87,7 @@ async function getOffersByDistrict(page, districtId, pageNumber = 1) {
             console.error(err);
             return [];
         })
-        .map(getDataFromOffer);
+        .then(offers => offers.map(getDataFromOffer))
 
     console.log('districtId: ' + districtId, 'pageNumber: ' + pageNumber);
 
@@ -100,11 +98,12 @@ async function getOffersByDistrict(page, districtId, pageNumber = 1) {
 }
 
 async function addOffers(offers) {
-    await fetch(`${config.get('api.host')}/offer`, {
-        method: 'post',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ offers })
-    });
+    await fetch(`${config.get('api.url')}/offer`, {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ offers })
+        })
+        .catch(err => console.error(err));
 }
 
 const getDataFromOffer = offer => {
