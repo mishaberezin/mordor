@@ -25,7 +25,7 @@ async function run() {
     const districts = shuffle(await getDistrictsIds());
 
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         defaultViewport: null,
         args: [
             '--disable-infobars',

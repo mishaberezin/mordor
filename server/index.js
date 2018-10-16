@@ -25,5 +25,7 @@ app.use((req, res, next) => {
     res.status(404).send("Fin!")
 });
 
-app.listen(3000);
-console.log('Express started on port 3000');
+module.exports = () => {
+    app.listen(3000);
+    console.log('Express started on port 3000');
+};
