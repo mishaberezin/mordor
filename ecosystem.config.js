@@ -38,7 +38,7 @@ module.exports = {
             user: 'ddml',
             host: '206.189.9.70',
             ref : 'origin/master',
-            repo: 'git+https://bitbucket.org/dedimolya/apt-finder.git',
+            repo: 'git@bitbucket.org:dedimolya/apt-finder.git',
             path: '/home/ddml/apt-finder',
             'post-deploy': 'npm ci && pm2 reload --env production'
         }

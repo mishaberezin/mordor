@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://bitbucket.org/dedimolya/apt-finder.git"
+    "url": "https://bitbucket.org/dedimolya/apt-finder.git"
   },
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
