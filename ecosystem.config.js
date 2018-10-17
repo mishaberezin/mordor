@@ -40,12 +40,8 @@ module.exports = {
             ref : 'origin/master',
             repo: 'git@bitbucket.org:dedimolya/apt-finder.git',
             path: '/home/ddml/apt-finder',
-            "post-setup": "ls -la",
-            "pre-deploy-local" : "echo 'This is a local executed command'",
-            'post-deploy': 'npm ci && pm2 reload --env production',
-            "env"  : {
-                "NODE_ENV": "production"
-            }
+            'post-setup': 'ls -la',
+            'post-deploy': 'npm ci && pm2 reload --env production'
         }
     }
 };
