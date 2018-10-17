@@ -28,3 +28,11 @@ pm2
 Конфигурация
 ------------
 
+Мэджик
+------
+
+1. Пакет `node-gyp` требует Python 2.7.
+  __Лечение__:
+```js
+npm config set python '/usr/bin/python2.7'
+```
