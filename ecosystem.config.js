@@ -23,15 +23,15 @@ module.exports = {
             ...defaults
         },
         {
-            name: 'digest',
-            script: 'apps/digest.js',
+            name: 'process',
+            script: 'apps/process.js',
             ...defaults
         },
-        // {
-        //     name: 'post',
-        //     script: 'apps/post.js',
-        //     ...defaults
-        // },
+        {
+            name: 'post',
+            script: 'apps/post.js',
+            ...defaults
+        }
     ],
     deploy: {
         production: {

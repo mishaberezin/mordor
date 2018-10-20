@@ -10,7 +10,7 @@ const post = async () => {
             .then(res => {
                 console.log(`post_id ${res}`);
                 if (res) {
-                    db.clearPostOffers({ _id: o._id });
+                    return db.clearPostOffers({ _id: o._id });
                 }
             });
     }
