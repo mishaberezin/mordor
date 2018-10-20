@@ -36,3 +36,19 @@ pm2
 ```js
 npm config set python '/usr/bin/python2.7'
 ```
+
+2. pm2 открывает неинтерактивный шел для деплоя, поэтому строчки про подключение nvm находятся в самом верху `.bashrc` до проверки про интерактивность.
+
+```sh
+# Load nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# ...
+```
