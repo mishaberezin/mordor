@@ -41,7 +41,7 @@ module.exports = {
             repo: 'git@bitbucket.org:dedimolya/apt-finder.git',
             path: '/home/ddml/apt-finder',
             'post-setup': 'ls -la',
-            'post-deploy': 'npm ci && pm2 reload all --env production'
+            'post-deploy': 'npm ci && pm2 startOrReload all --env production'
         }
     }
 };
