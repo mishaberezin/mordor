@@ -11,11 +11,12 @@ router.get('/', async function(req, res, next) {
     res.render('index', { offers });
 });
 
-router.get('/:id', async function(req, res, next) {
+router.get('/offer/:id', async function(req, res, next) {
     const id = req.params.id;
     let offer = (await base.getOffers({ _id: id}))[0];
     let places = [].concat.apply([], (await base.getPlaces()).map(a => a.items));
-    let offerCoords = offer.address.meta.geometry.coordinates;
+    let offerCoords = offer.geodata.geometry.coordinates;
+
 
     let closePlaces = places.map(p => {
         const lat = p.coordinates[0];
@@ -26,7 +27,7 @@ router.get('/:id', async function(req, res, next) {
 
         if (!dCoord) return false;
 
-        return Object.assign(p, { d: dLat + dLang })
+        return Object.assign(p)
     })
         .filter(Boolean)
 
@@ -40,7 +41,7 @@ router.get('/:id', async function(req, res, next) {
                     Math.ceil(paths[0].distance.toFixed(0, 10) / 10) * 10 + 'м' :
                     (paths[0].distance/1000).toFixed(1, 10) + 'км'),
                 time: (paths[0].distance / 80).toFixed(0, 10),
-                timeText: (paths[0].distance / 80).toFixed(0, 10) + ' мин.'
+                timeText: (paths[0].distance / 80).toFixed(0, 10) + 'мин.'
             }))
             .then(resolve)
         ))
