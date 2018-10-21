@@ -9,7 +9,7 @@
     "mine": "node ./miners/index.js",
     "start": "node ./server/index.js",
     "mine-shops": "node ./scripts/mine-shops",
-    "post": "node ./scripts/post"
+    "post": "node ./apps/post"
   },
   "repository": {
     "type": "git",

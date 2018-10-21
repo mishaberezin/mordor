@@ -126,6 +126,7 @@ const getDataFromOffer = offer => {
         description,
         price: priceRur,
         phone: `${phones[0].countryCode}${phones[0].number}`,
+        metro: Object(offer.geo.undergrounds.filter(u => u.isDefault)[0]).name,
         url: fullUrl,
         isAgent: Object(user).isAgent,
         addressRaw: (offer.geo.address || [])
