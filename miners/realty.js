@@ -12,6 +12,10 @@ const selectors = {
     offerLinks: '.serp-item__offer-link, .OffersSerpItem__generalInfo .OffersSerpItem__link',
     address: '.offer-card__address',
     roomsCount: '.offer-card__feature_name_rooms-total .offer-card__feature-value',
+    floor: '.offer-card__feature_name_floors-total-apartment .offer-card__feature-value',
+    totalArea: '.offer-card__feature_name_total-area .offer-card__feature-value',
+    description: '.offer-card__desc-text',
+    price: '.offer-price',
     isStudio: '.offer-card__feature_name_studio .offer-card__feature-value'
 }
 
@@ -208,20 +212,29 @@ class Robot {
                         waitUntil: 'domcontentloaded'
                     });
 
-                    const data = await offerPage.evaluate(({ address, roomsCount, isStudio }) => {
+                    const data = await offerPage.evaluate(({
+                        address,
+                        roomsCount,
+                        isStudio,
+                        totalArea,
+                        floor,
+                        description,
+                        price
+                    }) => {
                         const roomsCountElem = document.querySelector(roomsCount);
                         const isStudioElem = document.querySelector(isStudio);
+                        const totalAreaElem = document.querySelector(totalArea);
 
                         return {
                             url: location.href,
                             addressRaw: document.querySelector(address).textContent,
                             roomsCount: roomsCountElem ? roomsCountElem.textContent : isStudioElem ? 0 : null,
-                            totalArea: null,
-                            floor: null,
+                            totalArea: totalAreaElem ? totalAreaElem.textContent : null,
+                            floor: floor ? floor.textContent : null,
                             photos: null,
                             parsedTimestamp: (Date.now() / 1000).toFixed(0, 10),
-                            description: null,
-                            price: null,
+                            description: description ? description.textContent : null,
+                            price: price ? price.textContent : null,
                             phone: null,
                             isAgent: null
                         }
@@ -242,11 +255,16 @@ class Robot {
 
 async function postOffer(offer) {
     await fetch(`${config.get('api.url')}/offer`, {
-        method: 'post',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ offers: [offer] })
+    })
+    .catch(err => {
+        console.log('ОШИБКА');
+        console.log(offer);
+        console.log(err);
     });
 }
 
@@ -255,9 +273,9 @@ async function run() {
 
     for await (const offer of robot.offers()) {
         await postOffer(offer);
-        await robot.stop();
-        console.log('GOOD BYE!!!');
-        return;
+        // await robot.stop();
+        // console.log('GOOD BYE!!!');
+        // return;
     }
 }
 
