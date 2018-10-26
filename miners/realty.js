@@ -3,6 +3,7 @@ const puppeteer = require('puppeteer');
 const range = require('lodash/range');
 const shuffle = require('lodash/shuffle');
 const fetch = require('node-fetch');
+const utils = require('./utils');
 
 const selectors = {
     districtsPopupOpenButton: '.FiltersFormField__refinements-selector .Link:nth-child(2)',
@@ -16,8 +17,47 @@ const selectors = {
     totalArea: '.offer-card__feature_name_total-area .offer-card__feature-value',
     description: '.offer-card__desc-text',
     price: '.offer-price',
-    isStudio: '.offer-card__feature_name_studio .offer-card__feature-value'
-}
+    isStudio: '.offer-card__feature_name_studio .offer-card__feature-value',
+    phonesButton: '.phones__button',
+    infoModal: '.helpful-info_type_offer',
+    phones: '.helpful-info__contact-phones',
+    authorNote: '.offer-card__author-note',
+    redirectPhone: '.helpful-info__redirect-phone',
+};
+
+const blackList = [
+    /^https:\/\/mc\.yandex\.ru/,
+    /^https:\/\/static-maps\.yandex\.ru/,
+    /^https:\/\/realty\.yandex\.ru\/manifest\.json/,
+    /^https:\/\/analytics\.twitter\.com/,
+    /^https:\/\/platform\.twitter\.com/,
+    /^https:\/\/www\.facebook\.com/,
+    /^https:\/\/yandex\.ru\/set\/s\/rsya-tag-users/,
+    /^https:\/\/www\.googleadservices\.com/,
+    /^https:\/\/googleads\.g\.doubleclick\.net/,
+    /^https:\/\/wcm\.solution\.weborama\.fr/,
+    /^https:\/\/connect\.facebook\.net/,
+    /^https:\/\/.+\.criteo\.[^.]+\//,
+    /\.ico$/,
+    /^https:\/\/yastatic\.net\/s3\/vertis-frontend/,
+    /^https:\/\/ads\.adfox\.ru/,
+    /^https:\/\/an\.yandex\.ru\/partner-code-bundles/,
+    /^https:\/\/yastatic\.net\/pcode\/adfox\/loader\.js/,
+    /^https:\/\/awaps\.yandex\.net/,
+    /^https:\/\/google-analytics\.com/,
+    /^https:\/\/unpkg\.com/,
+    /^https:\/\/yastatic\.net\/realty2\/_\/fCbpL9c4MT8kkdZmRcV0QC80VNw\.png/,
+    /^https:\/\/yastatic\.net\/q\/set\/s\/rsya-tag-users/,
+    /^https:\/\/an\.yandex\.ru/,
+    /^https:\/\/static-mon\.yandex\.net/,
+    /^https:\/\/www\.googletagmanager\.com/,
+    /^https:\/\/static\.ads-twitter\.com/,
+    /^https:\/\/.+\.mail\.ru\//
+];
+
+const whiteList = [
+    /^https:\/\/ysa-static\.passport\.yandex\.ru/
+];
 
 class Robot {
     constructor() {
@@ -35,28 +75,31 @@ class Robot {
             ignoreHTTPSErrors: true
         });
 
-        // Используем стартовую вкладку, если есть
+        // Используем стартовую вкладку, если есть.
         const allPages = await browser.pages();
         const mainPage = allPages[0] || await browser.newPage();
 
         const waitAndClick = async selector => {
             // Если использовать ElementHandle, возвращаемый из waitForSelector,
-            // await (await mainPage.waitForSelector(selector)).click();
-            // иногда возникает ошибка "Error: Node is detached from document",
+            // await (await page.waitForSelector(selector)).click();
+            // можно столкнуться с ошибкой "Error: Node is detached from document",
             // поэтому пользуемся mainPage.click(selector).
             await mainPage.waitForSelector(selector)
             await mainPage.click(selector);
         }
 
-        // CSS фикс, устойчивый к перезагрузкам
+        // CSS фикс, устойчивый к перезагрузкам.
         await mainPage.evaluateOnNewDocument(() => {
             (function fix() {
                 if(!document.head) {
                     setTimeout(fix, 100);
                 } else {
-                    document.getElementById('f1xed') || document.head.insertAdjacentHTML('beforeend', [
-                        '<style id="f1xed">.subscription-wizard, .popup__under_type_paranja { display: none } </style>'
-                    ].join('\n'));
+                    document.getElementById('f1xed') || document.head.insertAdjacentHTML('beforeend', (
+                        '<style id="f1xed">' +
+                        '.subscription-wizard, .popup__under_type_paranja, .lg-cc' +
+                        '{ display: none !important }' +
+                        '</style>'
+                    ));
                 }
             })();
         });
@@ -66,45 +109,11 @@ class Robot {
             waitUntil: 'domcontentloaded'
         });
 
-        // Фильтруем траффик для экономии
+        // Фильтруем траффик для экономии денег.
         await mainPage.setRequestInterception(true);
 
         mainPage.on('request', request => {
-            const requestUrl = new URL(request.url());
-            const blackList = [
-                /^https:\/\/mc\.yandex\.ru/,
-                /^https:\/\/static-maps\.yandex\.ru/,
-                /^https:\/\/realty\.yandex\.ru\/manifest\.json/,
-                /^https:\/\/analytics\.twitter\.com/,
-                /^https:\/\/platform\.twitter\.com/,
-                /^https:\/\/www\.facebook\.com/,
-                /^https:\/\/yandex\.ru\/set\/s\/rsya-tag-users/,
-                /^https:\/\/www\.googleadservices\.com/,
-                /^https:\/\/googleads\.g\.doubleclick\.net/,
-                /^https:\/\/wcm\.solution\.weborama\.fr/,
-                /^https:\/\/connect\.facebook\.net/,
-                /^https:\/\/.+\.criteo\.[^.]+\//,
-                /\.ico$/,
-                /^https:\/\/yastatic\.net\/s3\/vertis-frontend/,
-                /^https:\/\/ads\.adfox\.ru/,
-                /^https:\/\/an\.yandex\.ru\/partner-code-bundles/,
-                /^https:\/\/yastatic\.net\/pcode\/adfox\/loader\.js/,
-                /^https:\/\/awaps\.yandex\.net/,
-                /^https:\/\/google-analytics\.com/,
-                /^https:\/\/unpkg\.com/,
-                /^https:\/\/yastatic\.net\/realty2\/_\/fCbpL9c4MT8kkdZmRcV0QC80VNw\.png/,
-                /^https:\/\/yastatic\.net\/q\/set\/s\/rsya-tag-users/,
-                /^https:\/\/an\.yandex\.ru/,
-                /^https:\/\/static-mon\.yandex\.net/,
-                /^https:\/\/www\.googletagmanager\.com/,
-                /^https:\/\/static\.ads-twitter\.com/,
-                /^https:\/\/.+\.mail\.ru\//
-            ];
-            const whiteList = [
-                /^https:\/\/ysa-static\.passport\.yandex\.ru/
-            ];
             const url = request.url();
-            const shortUrl = request.url().slice(0, 200);
 
             if(blackList.some(re => re.test(url))) {
                 request.abort();
@@ -117,13 +126,13 @@ class Robot {
             }
         });
 
-        // Переходим по ссылке "Аренда" в меню
-        await waitAndClick(selectors.rentalMenuItem);
+        // Переходим по ссылке "Аренда" в меню.
+        await utils.waitAndClick(mainPage, selectors.rentalMenuItem);
 
-        // Общая выдача заканчивается на 20й странице, поэтому загружаем частями.
-        // Список регионов получаем из поисковых фильтров.
-        await waitAndClick(selectors.extraFilters);
-        await waitAndClick(selectors.districtsPopupOpenButton);
+        // Любая выдача заканчивается на 20й странице, поэтому загрузить все сразу нельзя.
+        // Получаем список регионов из поисковых фильтров, чтобы загружать выдачу частями.
+        await utils.waitAndClick(mainPage, selectors.extraFilters);
+        await utils.waitAndClick(mainPage, selectors.districtsPopupOpenButton);
         await mainPage.waitForSelector(selectors.regionsContainer);
 
         const regions = await mainPage.$eval(selectors.regionsContainer, elem => {
@@ -153,13 +162,13 @@ class Robot {
             }
         }
 
-        const getSerpUrl = (region, page) => {
-            return `https://realty.yandex.ru/moskva/snyat/kvartira/` +
-                `?hasAgentFee=NO&sort=DATE_DESC&subLocality=${region}&page=${page}`;
-        }
-
         const waitNewOffers = async () => {
-            const ts = Date.now();
+            const timer = (limit) => {
+                const start = Date.now();
+                return () => {
+                    return Date.now() - start > limit;
+                }
+            }
             const sleep = async (ms) => {
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
@@ -178,11 +187,12 @@ class Robot {
                 }
             }
             const whatWasBefore = await get1stLinkHref();
+            const timeout = timer(20000);
 
             while(await get1stLinkHref() === whatWasBefore) {
                 await sleep(100);
-                if((Date.now() - ts) > 20000) {
-                    throw new Error();
+                if(timeout()) {
+                    throw new Error('Timeout');
                 }
             }
 
@@ -190,19 +200,22 @@ class Robot {
         }
 
         for (const region of neverend(regions)) {
-            // Больше 20 это какая-то аномалия
-            for (const page of range(20)) {
-                let newOffers;
-                const newOffersWaiter = waitNewOffers();
+            // Считаем, что больше 20 страниц это аномалия.
+            for (const pageNumber of range(20)) {
+                const newOffersWaiter = waitNewOffers(); // Вызывается до загрузки следующего серпа.
+                const nextSerpUrl = (
+                    `https://realty.yandex.ru/moskva/snyat/kvartira/` +
+                    `?hasAgentFee=NO&sort=DATE_DESC&subLocality=${region}&page=${pageNumber}`);
 
-                await mainPage.goto(getSerpUrl(region, page), {
+                await mainPage.goto(nextSerpUrl, {
                     waitUntil: 'domcontentloaded'
                 });
 
+                let newOffers;
                 try {
                     newOffers = await newOffersWaiter;
                 } catch(e) {
-                    break;
+                    break; // Выдача пустая, загружаем следующий регион.
                 }
 
                 for(const href of newOffers) {
@@ -212,6 +225,9 @@ class Robot {
                         waitUntil: 'domcontentloaded'
                     });
 
+                    await utils.waitAndClick(offerPage, selectors.phonesButton);
+                    await offerPage.waitForSelector(selectors.infoModal);
+
                     const data = await offerPage.evaluate(({
                         address,
                         roomsCount,
@@ -219,14 +235,22 @@ class Robot {
                         totalArea,
                         floor,
                         description,
-                        price
+                        price,
+                        phones,
+                        authorNote,
+                        redirectPhone,
                     }) => {
                         const roomsCountElem = document.querySelector(roomsCount);
                         const isStudioElem = document.querySelector(isStudio);
                         const totalAreaElem = document.querySelector(totalArea);
+                        const phonesElem = document.querySelector(phones);
+                        const redirectPhoneElem = document.querySelector(redirectPhone);
+                        const authorNoteElem = document.querySelector(authorNote);
 
                         return {
+                            status: 'active',
                             url: location.href,
+                            oid: location.pathname.match(/\/offer\/([^/]+)\//)[1],
                             addressRaw: document.querySelector(address).textContent,
                             roomsCount: roomsCountElem ? roomsCountElem.textContent : isStudioElem ? 0 : null,
                             totalArea: totalAreaElem ? totalAreaElem.textContent : null,
@@ -235,16 +259,17 @@ class Robot {
                             parsedTimestamp: (Date.now() / 1000).toFixed(0, 10),
                             description: description ? description.textContent : null,
                             price: price ? price.textContent : null,
-                            phone: null,
-                            isAgent: null
+                            phone: phonesElem ? phonesElem.textContent : null,
+                            isFakePhone: redirectPhoneElem ? true : false,
+                            isAgent: authorNoteElem ? /агент/.test(authorNoteElem.textContent) : null,
                         }
                     }, selectors);
 
                     Object.assign(data, {
-                        sourceId: 'realty'
+                        sid: 'realty'
                     });
 
-                    await offerPage.close();
+                    // await offerPage.close();
 
                     yield data;
                 }
@@ -273,9 +298,10 @@ async function run() {
 
     for await (const offer of robot.offers()) {
         await postOffer(offer);
-        // await robot.stop();
-        // console.log('GOOD BYE!!!');
-        // return;
+        console.log('===========================');
+        console.log(offer);
+        console.log('===========================');
+        return;
     }
 }
 

@@ -110,13 +110,13 @@ const getDataFromOffer = offer => {
     let {
         description,
         bargainTerms: { priceRur },
-        phones, fullUrl, addedTimestamp, added,
-        id, user, photos, totalArea, roomsCount, floorNumber
+        phones, fullUrl,
+        cianId, user, photos, totalArea, roomsCount, floorNumber
     } = offer;
 
     return {
-        sourceId: 'cian',
-        offerId: String(offer.cianId),
+        sid: 'cian',
+        oid: String(cianId),
         status: 'active',
         totalArea,
         roomsCount,
