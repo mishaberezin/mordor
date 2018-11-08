@@ -251,7 +251,7 @@ class Robot {
                             status: 'active',
                             url: location.href,
                             oid: location.pathname.match(/\/offer\/([^/]+)\//)[1],
-                            addressRaw: document.querySelector(address).textContent,
+                            address: document.querySelector(address).textContent,
                             roomsCount: roomsCountElem ? roomsCountElem.textContent : isStudioElem ? 0 : null,
                             totalArea: totalAreaElem ? totalAreaElem.textContent : null,
                             floor: floor ? floor.textContent : null,

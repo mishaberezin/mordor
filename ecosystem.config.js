@@ -23,21 +23,21 @@ module.exports = {
             ...defaults
         },
         {
-            name: 'process',
-            script: 'apps/process.js',
+            name: 'digest',
+            script: 'apps/digest.js',
             ...defaults
         },
-        {
-            name: 'post',
-            script: 'apps/post.js',
-            ...defaults
-        }
+        // {
+        //     name: 'post',
+        //     script: 'apps/post.js',
+        //     ...defaults
+        // }
     ],
     deploy: {
         production: {
             user: 'ddml',
             host: '206.189.9.70',
-            ref : 'origin/master',
+            ref: 'origin/master',
             repo: 'git@bitbucket.org:dedimolya/apt-finder.git',
             path: '/home/ddml/apt-finder',
             'post-setup': 'ls -la',

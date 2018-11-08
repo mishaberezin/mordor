@@ -6,7 +6,8 @@ const add = (req, res) => {
             res.status(200).send('OK')
         })
         .catch(err => {
-            res.status(500).send({ error: err.toString() });
+            console.log(err);
+            res.status(500).send();
         });
 }
 

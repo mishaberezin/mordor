@@ -129,7 +129,7 @@ const getDataFromOffer = offer => {
         metro: Object(offer.geo.undergrounds.filter(u => u.isDefault)[0]).name,
         url: fullUrl,
         isAgent: Object(user).isAgent,
-        addressRaw: (offer.geo.address || [])
+        address: (offer.geo.address || [])
             .filter(a => a.geoType !== 'district' && a.geoType !== 'underground')
             .map(a => a.name).join(' ')
     }
