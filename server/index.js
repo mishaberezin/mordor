@@ -26,6 +26,6 @@ app.use((req, res, next) => {
 });
 
 module.exports = () => {
-    app.listen(3000);
-    console.log('Express started on port 3000');
+    app.listen(PORT);
+    console.log(`Express started on port ${PORT}`);
 };

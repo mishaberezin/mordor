@@ -122,14 +122,14 @@ const getDataFromOffer = offer => {
         roomsCount,
         floor: floorNumber,
         photos: photos.map(p => p.fullUrl),
-        parsedTimestamp: (Date.now() / 1000).toFixed(0, 10),
+        timestamp: (Date.now() / 1000).toFixed(0, 10),
         description,
         price: priceRur,
         phone: `${phones[0].countryCode}${phones[0].number}`,
         metro: Object(offer.geo.undergrounds.filter(u => u.isDefault)[0]).name,
         url: fullUrl,
         isAgent: Object(user).isAgent,
-        addressRaw: (offer.geo.address || [])
+        address: (offer.geo.address || [])
             .filter(a => a.geoType !== 'district' && a.geoType !== 'underground')
             .map(a => a.name).join(' ')
     }

@@ -37,6 +37,8 @@ pm2
 pm2 deploy production update
 ```
 
+Подробнее: https://pm2.io/doc/en/runtime/guide/easy-deploy-with-ssh/
+
 
 Мэджик
 ------

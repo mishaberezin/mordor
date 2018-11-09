@@ -36,7 +36,7 @@ async function getDetails(page, pageUrl) {
     // addedTimestamp: Number,
     const itemDetails = {
         serviceName: 'Avito',
-        parsedTimestamp: Date.now(),
+        timestamp: Date.now(),
         url: pageUrl
     };
 
@@ -283,7 +283,7 @@ async function getMetroIds() {
 // (async () => {
 //     const item = {
 //         // url: 'urlString',
-//         parsedTimestamp: Math.floor(Date.now() / 1000)
+//         timestamp: Math.floor(Date.now() / 1000)
 //     };
 //     await sendItem(item);
 // })()
