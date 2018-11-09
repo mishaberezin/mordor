@@ -256,7 +256,7 @@ class Robot {
                             totalArea: totalAreaElem ? totalAreaElem.textContent : null,
                             floor: floor ? floor.textContent : null,
                             photos: null,
-                            parsedTimestamp: (Date.now() / 1000).toFixed(0, 10),
+                            timestamp: (Date.now() / 1000).toFixed(0, 10),
                             description: description ? description.textContent : null,
                             price: price ? price.textContent : null,
                             phone: phonesElem ? phonesElem.textContent : null,
