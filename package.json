@@ -22,7 +22,6 @@
     "bluebird": "3.x",
     "body-parser": "^1.18.3",
     "canvas": "^1.6.11",
-    "compare": "git+ssh://git@bitbucket.org/dedimolya/compare.git",
     "config": "1.x",
     "express": "^4.16.3",
     "form-data": "^2.3.2",
