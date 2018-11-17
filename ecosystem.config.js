@@ -1,12 +1,15 @@
 const defaults = {
     env: {
-        "NODE_ENV": "development"
+        NODE_ENV: 'development',
+        NODE_APP_INSTANCE: ''
     },
     env_production: {
-        "NODE_ENV": "production"
+        NODE_ENV: 'production',
+        NODE_APP_INSTANCE: ''
     },
     min_uptime: 10000,
-    max_restarts: 3
+    max_restarts: 3,
+    log_date_format: 'DD-MM-YYYY HH:mm'
 };
 
 module.exports = {

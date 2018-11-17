@@ -8,8 +8,8 @@
     "preinstall": "# bash ./scripts/preinstall.sh",
     "mine": "node ./miners/index.js",
     "start": "node ./server/index.js",
-    "mine-shops": "node ./scripts/mine-shops",
-    "post": "node ./apps/post"
+    "api": "node ./apps/api.js",
+    "cian": "node ./apps/cian.js"
   },
   "repository": {
     "type": "git",
