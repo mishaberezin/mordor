@@ -9,7 +9,8 @@
     "mine": "node ./miners/index.js",
     "start": "node ./server/index.js",
     "api": "node ./apps/api.js",
-    "cian": "node ./apps/cian.js"
+    "cian": "node ./apps/cian.js",
+    "test": "ava"
   },
   "repository": {
     "type": "git",
@@ -34,5 +35,13 @@
     "request": "^2.85.0",
     "typograf": "^6.7.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "ava": "1.0.0-rc.2"
+  },
+  "ava": {
+    "files": "**/*.test.js",
+		"babel": false,
+    "compileEnhancements": false,
+    "timeout": "10s"
+	}
 }
