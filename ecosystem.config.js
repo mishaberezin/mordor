@@ -29,6 +29,11 @@ module.exports = {
             name: 'digest',
             script: 'apps/digest.js',
             ...defaults
+        },
+        {
+            name: 'report',
+            script: 'apps/report.js',
+            ...defaults
         }
     ],
     deploy: {
