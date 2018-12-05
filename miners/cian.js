@@ -38,10 +38,6 @@ async function run() {
     const allPages = await browser.pages();
     const page = allPages[0] || await browser.newPage();
 
-    const waitAndClick = async selector => {
-        await (await page.waitForSelector(selector)).click();
-    }
-
     // Экономим траффик
     await page.setRequestInterception(true);
 
@@ -70,7 +66,9 @@ async function run() {
 }
 
 async function getOffersByDistrict(page, districtId, pageNumber = 1) {
-    const url = `https://www.cian.ru/cat.php?currency=2&deal_type=rent&district%5B0%5D=${districtId}&engine_version=2&maxprice=70000&offer_type=flat&room1=1&room2=1&room3=1&room9=1&type=4&zerocom=0&p=${pageNumber}`;
+    const url = (
+        `https://www.cian.ru/cat.php` +
+        `?deal_type=rent&district%5B0%5D=${districtId}&engine_version=2&offer_type=flat&type=4&p=${pageNumber}`);
 
     await page.goto(url, { waitUntil: 'domcontentloaded' });
 
