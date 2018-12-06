@@ -1,7 +1,6 @@
 const db = require('../lib/db');
 
 (async function run() {
-    debugger;
     const activeOffersCount = await db.countOffers({status: 'active'});
 
     await db.addReport({
