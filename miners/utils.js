@@ -17,7 +17,12 @@ const neverend = function * (arr) {
     }
 }
 
+const sleep = async (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 module.exports = {
     waitAndClick,
-    neverend
+    neverend,
+    sleep
 };

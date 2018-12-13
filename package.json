@@ -19,20 +19,20 @@
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
   "dependencies": {
-    "@sentry/node": "^4.4.0",
+    "@sentry/node": "^4.4.1",
     "body-parser": "^1.18.3",
     "canvas": "^1.6.13",
     "config": "1.x",
     "express": "^4.16.4",
     "form-data": "^2.3.3",
     "lodash": "^4.17.10",
-    "mongoose": "^5.3.13",
+    "mongoose": "^5.3.16",
     "multi-geocoder": "0.1.x",
     "node-fetch": "^2.3.0",
     "ocrad.js": "git+https://github.com/antimatter15/ocrad.js.git",
-    "puppeteer": "^1.10.0",
+    "puppeteer": "^1.11.0",
     "request": "^2.85.0",
-    "typograf": "^6.7.3"
+    "typograf": "^6.7.4"
   },
   "devDependencies": {
     "ava": "1.0.0-rc.2"

@@ -120,7 +120,7 @@ const getDataFromOffer = offer => {
         roomsCount,
         floor: floorNumber,
         photos: photos.map(p => p.fullUrl),
-        timestamp: (Date.now() / 1000).toFixed(0, 10),
+        timestamp: Date.now(),
         description,
         price: priceRur,
         phone: `${phones[0].countryCode}${phones[0].number}`,

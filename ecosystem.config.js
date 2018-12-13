@@ -26,6 +26,12 @@ module.exports = {
             ...defaults
         },
         {
+            name: 'cian_checker',
+            script: 'apps/cian_checker.js',
+            max_memory_restart: '1G',
+            ...defaults
+        },
+        {
             name: 'digest',
             script: 'apps/digest.js',
             ...defaults
