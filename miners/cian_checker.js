@@ -136,7 +136,7 @@ class Robot {
                 yield offer.url;
             }
 
-            await sleep(HOUR);
+            await sleep(HOUR/60);
         }
     }
 
@@ -201,6 +201,7 @@ async function run() {
 
     for await (const offer of robot.offers()) {
         await postOffer(offer);
+        console.count('Чекнул ОФФЕР!');
     }
 }
 
