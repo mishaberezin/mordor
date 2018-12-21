@@ -1,4 +1,5 @@
 const express = require("express");
+
 const router = express.Router();
 const fs = require("fs");
 const fetch = require("node-fetch");
@@ -6,16 +7,19 @@ const fetch = require("node-fetch");
 const base = require("../../lib/db");
 
 /* GET home page. */
-router.get("/", async function(req, res, next) {
-  let offers = await base.getOffers({});
+router.get("/", async (req, res, next) => {
+  const offers = await base.getOffers({});
   res.render("index", { offers });
 });
 
-router.get("/offer/:id", async function(req, res, next) {
+router.get("/offer/:id", async (req, res, next) => {
   const id = req.params.id;
-  let offer = (await base.getOffers({ _id: id }))[0];
-  let places = [].concat.apply([], (await base.getPlaces()).map(a => a.items));
-  let offerCoords = offer.geodata.geometry.coordinates;
+  const offer = (await base.getOffers({ _id: id }))[0];
+  const places = [].concat.apply(
+    [],
+    (await base.getPlaces()).map(a => a.items)
+  );
+  const offerCoords = offer.geodata.geometry.coordinates;
 
   let closePlaces = places
     .map(p => {
@@ -45,10 +49,10 @@ router.get("/offer/:id", async function(req, res, next) {
               distance: paths[0].distance,
               distanceText:
                 paths[0].distance < 1000
-                  ? Math.ceil(paths[0].distance.toFixed(0, 10) / 10) * 10 + "м"
-                  : (paths[0].distance / 1000).toFixed(1, 10) + "км",
+                  ? `${Math.ceil(paths[0].distance.toFixed(0, 10) / 10) * 10}м`
+                  : `${(paths[0].distance / 1000).toFixed(1, 10)}км`,
               time: (paths[0].distance / 80).toFixed(0, 10),
-              timeText: (paths[0].distance / 80).toFixed(0, 10) + "мин."
+              timeText: `${(paths[0].distance / 80).toFixed(0, 10)}мин.`
             }))
             .then(resolve)
         )

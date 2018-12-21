@@ -139,7 +139,7 @@ class Robot {
     const regions = await mainPage.$eval(selectors.regionsContainer, elem => {
       const data = JSON.parse(elem.dataset.bem);
       const regions =
-        data["b-geoselector-refinement"]["regionData"]["sub-localities"];
+        data["b-geoselector-refinement"].regionData["sub-localities"];
 
       return regions.map(item => item.id);
     });
@@ -167,13 +167,9 @@ class Robot {
     const waitNewOffers = async () => {
       const timer = limit => {
         const start = Date.now();
-        return () => {
-          return Date.now() - start > limit;
-        };
+        return () => Date.now() - start > limit;
       };
-      const sleep = async ms => {
-        return new Promise(resolve => setTimeout(resolve, ms));
-      };
+      const sleep = async ms => new Promise(resolve => setTimeout(resolve, ms));
       const get1stLinkHref = async () => {
         try {
           return await mainPage.$eval(selectors.offerLinks, link => link.href);
@@ -269,7 +265,7 @@ class Robot {
                 description: description ? description.textContent : null,
                 price: price ? price.textContent : null,
                 phone: phonesElem ? phonesElem.textContent : null,
-                isFakePhone: redirectPhoneElem ? true : false,
+                isFakePhone: !!redirectPhoneElem,
                 isAgent: authorNoteElem
                   ? /агент/.test(authorNoteElem.textContent)
                   : null

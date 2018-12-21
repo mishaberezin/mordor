@@ -148,11 +148,12 @@ class Robot {
           waitUntil: "domcontentloaded"
         });
 
-        const { offer, agent, priceChanges } = await mainPage.evaluate(() => {
-          return window._cianConfig["offer-card"].find(item => {
-            return item.key === "defaultState";
-          }).value.offerData;
-        });
+        const { offer, agent, priceChanges } = await mainPage.evaluate(
+          () =>
+            window._cianConfig["offer-card"].find(
+              item => item.key === "defaultState"
+            ).value.offerData
+        );
 
         yield {
           sid: "cian",

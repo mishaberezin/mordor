@@ -15,15 +15,13 @@ const OCRAD = require("../../node_modules/ocrad.js/ocrad.js");
  *
  * @return {Promise<string[]>} – массив ссылок
  */
-async function getLinks(page) {
-  return await page.evaluate(function() {
-    return [].map.call(
+async      function getLinks(page) {
+  return await page.evaluate(() =>
+    [].map.call(
       document.querySelectorAll(".js-catalog-item-enum"),
-      function(el) {
-        return el.querySelector(".item-description-title-link").href;
-      }
-    );
-  });
+      el => el.querySelector(".item-description-title-link").href
+    )
+  );
 }
 
 /**
@@ -51,14 +49,12 @@ async function getDetails(page, pageUrl) {
 
     Object.assign(
       itemDetails,
-      await page.evaluate(function() {
+      await page.evaluate(() => {
         function getParam(name) {
           return (
             [].filter.call(
               document.querySelectorAll(".item-params-list-item"),
-              function(el) {
-                return new RegExp(name).test(el.innerText);
-              }
+              el => new RegExp(name).test(el.innerText)
             )[0] || {}
           ).innerText;
         }
@@ -81,9 +77,7 @@ async function getDetails(page, pageUrl) {
 
         let metro = [].map.call(
           document.querySelectorAll(".item-map-metro"),
-          function(el) {
-            return el.innerText.match(/(.+)\(/)[1].trim();
-          }
+          el => el.innerText.match(/(.+)\(/)[1].trim()
         )[0];
 
         metro = metro ? `м. ${metro}` : "";
@@ -101,17 +95,13 @@ async function getDetails(page, pageUrl) {
             .src,
           photos: [].map.call(
             document.querySelectorAll(".gallery-list-item-link"),
-            function(el) {
-              return (
-                "https:" +
-                el.style.backgroundImage
-                  // "url("//92.img.avito.st/75x55/2795968092.jpg")"
-                  // →
-                  // "//92.img.avito.st/75x55/2795968092.jpg"
-                  .slice(5, -2)
-                  .replace("75x55", "640x480")
-              );
-            }
+            el =>
+              `https:${el.style.backgroundImage
+                // "url("//92.img.avito.st/75x55/2795968092.jpg")"
+                // →
+                // "//92.img.avito.st/75x55/2795968092.jpg"
+                .slice(5, -2)
+                .replace("75x55", "640x480")}`
           ),
           __totalArea,
           totalArea,
@@ -288,15 +278,13 @@ async function getMetroIds() {
   await page.bringToFront();
   await page.goto(metroMapUrl, { waitUntil: "networkidle0" });
 
-  const metroIds = await page.evaluate(function() {
-    return [
-      ...new Set(
-        Array.from(document.querySelectorAll("[data-st-id]")).map(
-          item => item.attributes["data-st-id"].value
-        )
+  const metroIds = await page.evaluate(() => [
+    ...new Set(
+      Array.from(document.querySelectorAll("[data-st-id]")).map(
+        item => item.attributes["data-st-id"].value
       )
-    ];
-  });
+    )
+  ]);
 
   browser.close();
 

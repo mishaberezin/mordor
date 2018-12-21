@@ -69,27 +69,23 @@ async function getOffersByDistrict(page, districtId, pageNumber = 1) {
 
   await page.goto(url, { waitUntil: "domcontentloaded" });
 
-  let pageUrlParam = Number(
+  const pageUrlParam = Number(
     await page
-      .evaluate(() => {
-        return new URL(window.location.href).searchParams.get("p");
-      })
+      .evaluate(() => new URL(window.location.href).searchParams.get("p"))
       .catch(console.error)
   );
 
   if (pageUrlParam !== pageNumber) return false;
 
-  let offers = await page
-    .evaluate(() => {
-      return window.__serp_data__.results.offers;
-    })
+  const offers = await page
+    .evaluate(() => window.__serp_data__.results.offers)
     .catch(err => {
       console.error(err);
       return [];
     })
     .then(offers => offers.map(getDataFromOffer));
 
-  console.log("districtId: " + districtId, "pageNumber: " + pageNumber);
+  console.log(`districtId: ${districtId}`, `pageNumber: ${pageNumber}`);
 
   await addOffers(offers);
 
@@ -106,7 +102,7 @@ async function addOffers(offers) {
 }
 
 const getDataFromOffer = offer => {
-  let {
+  const {
     description,
     bargainTerms: { priceRur },
     phones,

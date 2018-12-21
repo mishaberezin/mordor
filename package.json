@@ -4,6 +4,13 @@
   "private": true,
   "description": "Программа для ЭВМ",
   "author": "Dedimolya HTML Team",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/dedimolya/apt-finder.git"
+  },
+  "engines": {
+    "node": ">=10"
+  },
   "scripts": {
     "preinstall": "# bash ./scripts/preinstall.sh",
     "mine": "node ./miners/index.js",
@@ -12,12 +19,21 @@
     "cian": "node ./apps/cian.js",
     "test": "eslint . && ava"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://bitbucket.org/dedimolya/apt-finder.git"
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && test"
+    }
   },
-  "engines": {
-    "node": ">=10"
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
@@ -43,6 +59,8 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^3.3.0",
     "eslint-plugin-import": "^2.14.0",
+    "husky": "^1.2.1",
+    "lint-staged": "^8.1.0",
     "prettier": "1.15.3"
   },
   "ava": {
