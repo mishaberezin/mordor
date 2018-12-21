@@ -10,11 +10,14 @@
     "start": "node ./server/index.js",
     "api": "node ./apps/api.js",
     "cian": "node ./apps/cian.js",
-    "test": "ava"
+    "test": "eslint . && ava"
   },
   "repository": {
     "type": "git",
     "url": "https://bitbucket.org/dedimolya/apt-finder.git"
+  },
+  "engines": {
+    "node": ">=10"
   },
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
@@ -35,12 +38,24 @@
     "typograf": "^6.7.4"
   },
   "devDependencies": {
-    "ava": "1.0.0-rc.2"
+    "ava": "1.0.0-rc.2",
+    "eslint": "^5.10.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^3.3.0",
+    "eslint-plugin-import": "^2.14.0",
+    "prettier": "1.15.3"
   },
   "ava": {
     "files": "**/*.test.js",
     "babel": false,
     "compileEnhancements": false,
     "timeout": "10s"
+  },
+  "prettier": {},
+  "eslintConfig": {
+    "extends": [
+      "airbnb-base",
+      "prettier"
+    ]
   }
 }

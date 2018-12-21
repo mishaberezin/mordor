@@ -1,12 +1,12 @@
-const db = require('../lib/db');
+const db = require("../lib/db");
 
 (async function run() {
-    const activeOffersCount = await db.countOffers({status: 'active'});
+  const activeOffersCount = await db.countOffers({ status: "active" });
 
-    await db.addReport({
-        timestamp: Date.now(),
-        activeOffers: activeOffersCount
-    });
+  await db.addReport({
+    timestamp: Date.now(),
+    activeOffers: activeOffersCount
+  });
 
-    setTimeout(run, 60000);
+  setTimeout(run, 60000);
 })();
