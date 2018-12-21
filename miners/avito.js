@@ -15,7 +15,7 @@ const OCRAD = require("../../node_modules/ocrad.js/ocrad.js");
  *
  * @return {Promise<string[]>} – массив ссылок
  */
-async      function getLinks(page) {
+async function getLinks(page) {
   return await page.evaluate(() =>
     [].map.call(
       document.querySelectorAll(".js-catalog-item-enum"),
