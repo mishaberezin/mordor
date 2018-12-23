@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer");
 const range = require("lodash/range");
 const shuffle = require("lodash/shuffle");
 const fetch = require("node-fetch");
-const utils = require("./utils");
+const { neverend, ...utils } = require("./utils");
 
 const selectors = {
   districtsPopupOpenButton:
@@ -78,29 +78,22 @@ class Robot {
     const allPages = await browser.pages();
     const mainPage = allPages[0] || (await browser.newPage());
 
-    const waitAndClick = async selector => {
-      // Если использовать ElementHandle, возвращаемый из waitForSelector,
-      // await (await page.waitForSelector(selector)).click();
-      // можно столкнуться с ошибкой "Error: Node is detached from document",
-      // поэтому пользуемся mainPage.click(selector).
-      await mainPage.waitForSelector(selector);
-      await mainPage.click(selector);
-    };
-
     // CSS фикс, устойчивый к перезагрузкам.
     await mainPage.evaluateOnNewDocument(() => {
       (function fix() {
-        if (!document.head) {
+        const isReady = Boolean(document.head);
+        const isFixed = document.getElementById("f1xed");
+
+        if (!isReady) {
           setTimeout(fix, 100);
-        } else {
-          document.getElementById("f1xed") ||
-            document.head.insertAdjacentHTML(
-              "beforeend",
-              '<style id="f1xed">' +
-                ".subscription-wizard, .popup__under_type_paranja, .lg-cc" +
-                "{ display: none !important }" +
-                "</style>"
-            );
+        } else if (!isFixed) {
+          document.head.insertAdjacentHTML(
+            "beforeend",
+            '<style id="f1xed">' +
+              ".subscription-wizard, .popup__under_type_paranja, .lg-cc" +
+              "{ display: none !important }" +
+              "</style>"
+          );
         }
       })();
     });
@@ -138,10 +131,10 @@ class Robot {
 
     const regions = await mainPage.$eval(selectors.regionsContainer, elem => {
       const data = JSON.parse(elem.dataset.bem);
-      const regions =
+      const regionData =
         data["b-geoselector-refinement"].regionData["sub-localities"];
 
-      return regions.map(item => item.id);
+      return regionData.map(item => item.id);
     });
 
     this.browser = browser;
@@ -152,17 +145,11 @@ class Robot {
   }
 
   async stop() {
-    return await this.browser.close();
+    return this.browser.close();
   }
 
   async *offers() {
     const { browser, mainPage, regions } = this;
-
-    const neverend = function*(arr) {
-      for (let i = 0; true; i = (i + 1) % arr.length) {
-        yield arr[i];
-      }
-    };
 
     const waitNewOffers = async () => {
       const timer = limit => {
@@ -265,7 +252,7 @@ class Robot {
                 description: description ? description.textContent : null,
                 price: price ? price.textContent : null,
                 phone: phonesElem ? phonesElem.textContent : null,
-                isFakePhone: !!redirectPhoneElem,
+                isFakePhone: Boolean(redirectPhoneElem),
                 isAgent: authorNoteElem
                   ? /агент/.test(authorNoteElem.textContent)
                   : null
@@ -277,8 +264,6 @@ class Robot {
           Object.assign(data, {
             sid: "realty"
           });
-
-          // await offerPage.close();
 
           yield data;
         }

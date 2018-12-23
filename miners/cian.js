@@ -3,13 +3,6 @@ const shuffle = require("lodash/shuffle");
 const puppeteer = require("puppeteer");
 const fetch = require("node-fetch");
 
-const selectors = {
-  actionButton: "#header-user-login",
-  usernameWrap: ".login-form-email",
-  passwordWrap: ".login-form-password",
-  submitButton: ".login-form-enter"
-};
-
 function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }

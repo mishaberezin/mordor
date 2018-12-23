@@ -1,7 +1,7 @@
 const config = require("config");
 const puppeteer = require("puppeteer");
 const db = require("../lib/db");
-const { sleep, ...utils } = require("./utils");
+const { sleep } = require("./utils");
 const fetch = require("node-fetch");
 
 const blackList = [

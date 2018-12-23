@@ -25,7 +25,7 @@ async function run(query, resolve) {
   await delay(2000);
 
   const scrollToLoad = async () => {
-    const { height, scroll, hasAddButton } = await page.evaluate(selectors => {
+    const { hasAddButton } = await page.evaluate(selectors => {
       const height = document.querySelector(selectors.scrollContent)
         .offsetHeight;
       const scroll = document.querySelector(selectors.scrollWrap).scrollTop;

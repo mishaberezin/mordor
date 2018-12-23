@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const { URL } = require("url");
 const puppeteer = require("puppeteer");
 const shuffle = require("lodash/shuffle");
@@ -83,10 +85,10 @@ async function getDetails(page, pageUrl) {
         metro = metro ? `м. ${metro}` : "";
 
         return {
-          price: avito.item.price,
-          addressRaw: avito.item.location,
-          __title: avito.item.title,
-          serviceId: avito.item.id,
+          // price: avito.item.price,
+          // addressRaw: avito.item.location,
+          // __title: avito.item.title,
+          // serviceId: avito.item.id,
           description: document.querySelector("[itemprop=description]")
             .innerText,
           __sellerInfo,
@@ -197,7 +199,6 @@ async function getLinksAndGoNext(page, pageNumber, metroId) {
 
 async function getItems(pageNumber = 0) {
   const browser = await puppeteer.launch({
-    // Раскомментировать, чтобы увидеть браузер.
     // headless: false
   });
 

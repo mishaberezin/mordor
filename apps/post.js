@@ -5,7 +5,7 @@ const post = async () => {
   const offers = await db.getPostOffers();
 
   for (const o of offers) {
-    const res = await vkPost(o)
+    await vkPost(o)
       .catch(console.error)
       .then(res => {
         console.log(`post_id ${res}`);

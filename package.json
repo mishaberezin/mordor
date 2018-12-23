@@ -58,6 +58,7 @@
     "eslint": "^5.10.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^3.3.0",
+    "eslint-config-xo": "^0.25.1",
     "eslint-plugin-import": "^2.14.0",
     "husky": "^1.2.1",
     "lint-staged": "^8.1.0",
@@ -72,8 +73,34 @@
   "prettier": {},
   "eslintConfig": {
     "extends": [
-      "airbnb-base",
+      "eslint:recommended",
       "prettier"
+    ],
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2018
+    },
+    "rules": {
+      "no-console": "off",
+      "no-unused-vars": [
+        "error",
+        {
+          "args": "none"
+        }
+      ]
+    },
+    "overrides": [
+      {
+        "files": [
+          "miners/**/*.js"
+        ],
+        "env": {
+          "browser": true
+        }
+      }
     ]
   }
 }
