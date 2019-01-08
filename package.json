@@ -17,7 +17,8 @@
     "start": "node ./server/index.js",
     "api": "node ./apps/api.js",
     "cian": "node ./apps/cian.js",
-    "test": "eslint . && ava"
+    "test": "eslint . && ava",
+    "deploy": "pm2 deploy production update"
   },
   "husky": {
     "hooks": {
