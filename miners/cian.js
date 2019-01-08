@@ -12,7 +12,7 @@ const { sleep, neverend, adblock } = require("./utils");
 class Robot extends EventEmitter {
   async init() {
     const browser = await puppeteer.launch({
-      headless: false,
+      // headless: false,
       defaultViewport: null,
       args: ["--disable-infobars", '--js-flags="--max-old-space-size=500"'],
       ignoreHTTPSErrors: true
@@ -104,7 +104,7 @@ class Robot extends EventEmitter {
         }
 
         const offers = await mainPage
-          .evaluate(() => window.__serp_data__.resu1lts.offers)
+          .evaluate(() => window.__serp_data__.results.offers)
           .catch(err => {
             robot.emit("error", "Не нашли данные по офферам", err);
             return [];
@@ -172,7 +172,7 @@ module.exports = async () => {
   const robot = new Robot();
 
   robot.on("error", (msg, err) => {
-    mordobot.sendMessage(`CiAN ROBOT ERROR: ${msg} \n err`);
+    mordobot.sendMessage(`CiAN ROBOT ERROR: ${msg} \n ${err}`);
     console.error(msg, err);
   });
 
