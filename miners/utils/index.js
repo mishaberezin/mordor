@@ -1,3 +1,5 @@
+const adblock = require("./adblock");
+
 // Ждет появление элемента с заданным селектором и кликает по нему.
 const waitAndClick = async (page, selector) => {
   // Если использовать ElementHandle, возвращаемый из waitForSelector,
@@ -17,10 +19,13 @@ const neverend = function*(arr) {
   }
 };
 
-const sleep = async ms => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = async ms => {
+  await new Promise(resolve => setTimeout(resolve, ms));
+};
 
 module.exports = {
   waitAndClick,
   neverend,
-  sleep
+  sleep,
+  adblock
 };

@@ -1,9 +1,19 @@
+require("dotenv").config(); // .env 🛫
+
 module.exports = {
   db: {
-    url:
-      "mongodb://robot:e3fbocIK4pqvJzr7@localhost/apt-finder?authSource=admin"
+    user: process.env.DB_USER,
+    pass: process.env.DB_PASS,
+    host: "localhost",
+    name: "apt-finder",
+    authSource: "admin"
   },
   sentry: {
-    dsn: "https://a0c7bf7efcc64a918907855a88f501b1@sentry.io/1256061"
+    key: process.env.SENTRY_KEY,
+    project: process.env.SENTRY_PROJECT
+  },
+  telegram: {
+    key: process.env.TELEGRAM_KEY,
+    chat: process.env.TELEGRAM_CHAT
   }
 };

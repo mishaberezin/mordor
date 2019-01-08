@@ -1,4 +1,7 @@
 node_modules
+
+# Secrets
+.env
 config/local.js
 
 # Junk

@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer");
 const range = require("lodash/range");
 const shuffle = require("lodash/shuffle");
 const fetch = require("node-fetch");
-const { neverend, ...utils } = require("./utils");
+const { neverend, waitAndClick, adblock } = require("./utils");
 
 const selectors = {
   districtsPopupOpenButton:
@@ -28,38 +28,6 @@ const selectors = {
   authorNote: ".offer-card__author-note",
   redirectPhone: ".helpful-info__redirect-phone"
 };
-
-const blackList = [
-  /^https:\/\/mc\.yandex\.ru/,
-  /^https:\/\/static-maps\.yandex\.ru/,
-  /^https:\/\/realty\.yandex\.ru\/manifest\.json/,
-  /^https:\/\/analytics\.twitter\.com/,
-  /^https:\/\/platform\.twitter\.com/,
-  /^https:\/\/www\.facebook\.com/,
-  /^https:\/\/yandex\.ru\/set\/s\/rsya-tag-users/,
-  /^https:\/\/www\.googleadservices\.com/,
-  /^https:\/\/googleads\.g\.doubleclick\.net/,
-  /^https:\/\/wcm\.solution\.weborama\.fr/,
-  /^https:\/\/connect\.facebook\.net/,
-  /^https:\/\/.+\.criteo\.[^.]+\//,
-  /\.ico$/,
-  /^https:\/\/yastatic\.net\/s3\/vertis-frontend/,
-  /^https:\/\/ads\.adfox\.ru/,
-  /^https:\/\/an\.yandex\.ru\/partner-code-bundles/,
-  /^https:\/\/yastatic\.net\/pcode\/adfox\/loader\.js/,
-  /^https:\/\/awaps\.yandex\.net/,
-  /^https:\/\/google-analytics\.com/,
-  /^https:\/\/unpkg\.com/,
-  /^https:\/\/yastatic\.net\/realty2\/_\/fCbpL9c4MT8kkdZmRcV0QC80VNw\.png/,
-  /^https:\/\/yastatic\.net\/q\/set\/s\/rsya-tag-users/,
-  /^https:\/\/an\.yandex\.ru/,
-  /^https:\/\/static-mon\.yandex\.net/,
-  /^https:\/\/www\.googletagmanager\.com/,
-  /^https:\/\/static\.ads-twitter\.com/,
-  /^https:\/\/.+\.mail\.ru\//
-];
-
-const whiteList = [/^https:\/\/ysa-static\.passport\.yandex\.ru/];
 
 class Robot {
   constructor() {
@@ -98,35 +66,22 @@ class Robot {
       })();
     });
 
+    adblock(mainPage, {
+      whiteList: [/^https:\/\/ysa-static\.passport\.yandex\.ru/]
+    });
+
     await mainPage.bringToFront();
     await mainPage.goto("https://realty.yandex.ru/", {
       waitUntil: "domcontentloaded"
     });
 
-    // Фильтруем траффик для экономии денег.
-    await mainPage.setRequestInterception(true);
-
-    mainPage.on("request", request => {
-      const url = request.url();
-
-      if (blackList.some(re => re.test(url))) {
-        request.abort();
-      } else if (whiteList.some(re => re.test(url))) {
-        request.continue();
-      } else if (["image", "font"].includes(request.resourceType())) {
-        request.abort();
-      } else {
-        request.continue();
-      }
-    });
-
     // Переходим по ссылке "Аренда" в меню.
-    await utils.waitAndClick(mainPage, selectors.rentalMenuItem);
+    await waitAndClick(mainPage, selectors.rentalMenuItem);
 
     // Любая выдача заканчивается на 20й странице, поэтому загрузить все сразу нельзя.
     // Получаем список регионов из поисковых фильтров, чтобы загружать выдачу частями.
-    await utils.waitAndClick(mainPage, selectors.extraFilters);
-    await utils.waitAndClick(mainPage, selectors.districtsPopupOpenButton);
+    await waitAndClick(mainPage, selectors.extraFilters);
+    await waitAndClick(mainPage, selectors.districtsPopupOpenButton);
     await mainPage.waitForSelector(selectors.regionsContainer);
 
     const regions = await mainPage.$eval(selectors.regionsContainer, elem => {
@@ -212,7 +167,7 @@ class Robot {
             waitUntil: "domcontentloaded"
           });
 
-          await utils.waitAndClick(offerPage, selectors.phonesButton);
+          await waitAndClick(offerPage, selectors.phonesButton);
           await offerPage.waitForSelector(selectors.infoModal);
 
           const data = await offerPage.evaluate(
@@ -286,16 +241,10 @@ async function postOffer(offer) {
   });
 }
 
-async function run() {
+module.exports = async () => {
   const robot = await new Robot();
 
   for await (const offer of robot.offers()) {
     await postOffer(offer);
-    console.log("===========================");
-    console.log(offer);
-    console.log("===========================");
-    return;
   }
-}
-
-module.exports = run;
+};

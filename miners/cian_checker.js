@@ -1,57 +1,8 @@
 const config = require("config");
 const puppeteer = require("puppeteer");
 const db = require("../lib/db");
-const { sleep } = require("./utils");
+const { sleep, adblock } = require("./utils");
 const fetch = require("node-fetch");
-
-const blackList = [
-  /^https?:\/\/images-cdn\.cian\.site/,
-  /^https?:\/\/api\.flocktory\.com/,
-  /^https?:\/\/www\.googletagmanager\.com/,
-  /^https?:\/\/connect\.facebook\.net/,
-  /^https?:\/\/banners\.adfox\.ru/,
-  /^https?:\/\/www\.google-analytics\.com/,
-  /^https?:\/\/static\.criteo\.net/,
-  /^https?:\/\/top-fwz1\.mail\.ru/,
-  /^https?:\/\/ad\.360yield\.com/,
-  /^https?:\/\/secure\.adnxs\.com/,
-  /^https?:\/\/r\.casalemedia\.com/,
-  /^https?:\/\/dis\.eu\.criteo\.com/,
-  /^https?:\/\/ads\.adfox\.ru/,
-  /^https?:\/\/ads\.yahoo\.com/,
-  /^https?:\/\/x\.cnt\.my/,
-  /^https?:\/\/rtbcc\.fyber\.com/,
-  /^https?:\/\/sslwidget\.criteo\.com/,
-  /^https?:\/\/rtb-csync\.smartadserver\.com/,
-  /^https?:\/\/simage2\.pubmatic\.com/,
-  /^https?:\/\/top-fwz1\.mail\.ru/,
-  /^https?:\/\/an\.yandex\.ru/,
-  /^https?:\/\/pixel\.advertising\.com/,
-  /^https?:\/\/profile\.ssp\.rambler\.ru/,
-  /^https?:\/\/rtax\.criteo\.com/,
-  /^https?:\/\/trc\.taboola\.com/,
-  /^https?:\/\/eb2\.3lift\.com/,
-  /^https?:\/\/visitor\.omnitagjs\.com/,
-  /^https?:\/\/ad\.mail\.ru/,
-  /^https?:\/\/dis\.criteo\.com/,
-  /^https?:\/\/sopr-api\.cian\.ru/,
-  /^https?:\/\/x\.bidswitch\.net/,
-  /^https?:\/\/px\.adhigh\.net/,
-  /^https?:\/\/sync\.ligadx\.com/,
-  /^https?:\/\/vk\.com/,
-  /^https?:\/\/s\.sspqns\.com/,
-  /^https?:\/\/counter\.yadro\.ru/,
-  /^https?:\/\/us-u\.openx\.net/,
-  /^https?:\/\/x\.cnt\.my/,
-  /^https?:\/\/matching\.ivitrack\.com/,
-  /^https?:\/\/www\.facebook\.com/,
-  /^https?:\/\/sy\.eu\.angsrvr\.com/,
-  /^https?:\/\/sync\.outbrain\.com/,
-  /^https?:\/\/idsync\.rlcdn\.com/,
-  /^https?:\/\/.*\.doubleclick\.net/
-];
-
-const whiteList = [];
 
 class Robot {
   constructor() {
@@ -88,22 +39,7 @@ class Robot {
       })();
     });
 
-    // Экономим траффик.
-    await mainPage.setRequestInterception(true);
-
-    mainPage.on("request", request => {
-      const url = request.url();
-
-      if (blackList.some(re => re.test(url))) {
-        request.abort();
-      } else if (whiteList.some(re => re.test(url))) {
-        request.continue();
-      } else if (["image", "font"].includes(request.resourceType())) {
-        request.abort();
-      } else {
-        request.continue();
-      }
-    });
+    adblock(mainPage);
 
     await mainPage.bringToFront();
     await mainPage.goto("https://www.cian.ru/", {
@@ -201,7 +137,6 @@ async function run() {
 
   for await (const offer of robot.offers()) {
     await postOffer(offer);
-    console.count("Чекнул ОФФЕР!");
   }
 }
 
