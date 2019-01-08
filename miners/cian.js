@@ -55,7 +55,7 @@ class Robot extends EventEmitter {
   }
 
   async mine() {
-    const delay = 5000;
+    const delay = 20000;
 
     for await (const offers of this.offers()) {
       await this.send(offers)
@@ -108,7 +108,7 @@ class Robot extends EventEmitter {
         }
 
         const offers = await mainPage
-          .evaluate(() => window.__serp_data__.results1.offers)
+          .evaluate(() => window.__serp_data__.results.offers)
           .catch(async error => {
             const screenshotPath = tempy.file();
 
@@ -190,7 +190,7 @@ module.exports = async () => {
   const robot = new Robot();
 
   robot.on("error", async (msg, { error, screenshotPath }) => {
-    await mordobot.sendMessage(`CiAN ROBOT ERROR: ${msg} \n ${error}`);
+    await mordobot.sendMessage(`CIAN ROBOT ERROR: ${msg} \n ${error}`);
     if (screenshotPath) {
       await mordobot.sendPhoto(fs.createReadStream(screenshotPath));
     }
@@ -200,9 +200,11 @@ module.exports = async () => {
   try {
     await robot.init();
     await robot.mine();
-  } catch (err) {
-    mordobot.sendMessage(`CIAN ROBOT CRASH: \n err`);
-    console.error(err);
-    throw err;
+  } catch (error) {
+    await mordobot.sendMessage(`CIAN ROBOT CRASH: \n ${error}`);
+    console.error(error);
+    setTimeout(() => {
+      throw error;
+    }, 5000);
   }
 };
