@@ -54,6 +54,7 @@
     "puppeteer": "^1.11.0",
     "request": "^2.85.0",
     "slimbot": "^0.8.6",
+    "tempy": "^0.2.1",
     "typograf": "^6.7.4"
   },
   "devDependencies": {

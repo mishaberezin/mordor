@@ -1,3 +1,4 @@
+const fs = require("fs");
 const EventEmitter = require("events");
 const config = require("config");
 const range = require("lodash/range");
@@ -5,6 +6,7 @@ const shuffle = require("lodash/shuffle");
 const fetch = require("node-fetch");
 const puppeteer = require("puppeteer");
 const retry = require("promise-retry");
+const tempy = require("tempy");
 
 const mordobot = require("../lib/mordobot");
 const { sleep, neverend, adblock } = require("./utils");
@@ -23,9 +25,9 @@ class Robot extends EventEmitter {
 
     await adblock(mainPage);
 
-    const regions = await this.getRegions().catch(err => {
-      this.emit("error", "Не удалось скачать список регионов", err);
-      throw err;
+    const regions = await this.getRegions().catch(error => {
+      this.emit("error", "Не удалось скачать список регионов", { error });
+      throw error;
     });
 
     this.browser = browser;
@@ -60,8 +62,8 @@ class Robot extends EventEmitter {
         .then(() => {
           console.log(`Отправили ${offers.length} штук офферов`);
         })
-        .catch(err => {
-          this.emit("error", "Не удалось отправить офферы", err);
+        .catch(error => {
+          this.emit("error", "Не удалось отправить офферы", { error });
         });
 
       await sleep(delay);
@@ -87,8 +89,10 @@ class Robot extends EventEmitter {
               })
               .catch(retry)
           );
-        } catch (err) {
-          robot.emit("error", `Не удалось загрузить страницу ${url}`, err);
+        } catch (error) {
+          robot.emit("error", `Не удалось загрузить страницу ${url}`, {
+            error
+          });
           continue;
         }
 
@@ -104,14 +108,28 @@ class Robot extends EventEmitter {
         }
 
         const offers = await mainPage
-          .evaluate(() => window.__serp_data__.results.offers)
-          .catch(err => {
-            robot.emit("error", "Не нашли данные по офферам", err);
+          .evaluate(() => window.__serp_data__.results1.offers)
+          .catch(async error => {
+            const screenshotPath = tempy.file();
+
+            await mainPage.screenshot({
+              path: screenshotPath,
+              type: "jpeg",
+              quality: 1,
+              // fullPage: true,
+              encoding: "binary"
+            });
+
+            robot.emit("error", "Не нашли данные по офферам", {
+              error,
+              screenshotPath
+            });
+
             return [];
           })
           .then(offers => offers.map(makeOffer))
-          .catch(err => {
-            robot.emit("error", "Не удалось обработать офферы", err);
+          .catch(error => {
+            robot.emit("error", "Не удалось обработать офферы", { error });
             return [];
           });
 
@@ -171,9 +189,12 @@ class Robot extends EventEmitter {
 module.exports = async () => {
   const robot = new Robot();
 
-  robot.on("error", (msg, err) => {
-    mordobot.sendMessage(`CiAN ROBOT ERROR: ${msg} \n ${err}`);
-    console.error(msg, err);
+  robot.on("error", async (msg, { error, screenshotPath }) => {
+    await mordobot.sendMessage(`CiAN ROBOT ERROR: ${msg} \n ${error}`);
+    if (screenshotPath) {
+      await mordobot.sendPhoto(fs.createReadStream(screenshotPath));
+    }
+    console.error(msg, error);
   });
 
   try {

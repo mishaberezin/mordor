@@ -25,7 +25,7 @@ module.exports = {
       if (key && project) {
         return `https://${key}@${host}/${project}`;
       } else {
-        return undefined;
+        return "";
       }
     })
   }
