@@ -54,7 +54,7 @@ class Robot extends EventEmitter {
         });
 
         await servicePage.waitForNavigation({ timeout: 0 });
-        tunnel.close();
+        // tunnel.close();
         watchCaptcha = true;
       }
     });
