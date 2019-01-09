@@ -39,6 +39,7 @@ class Robot extends EventEmitter {
       if (isCaptcha && watchCaptcha) {
         watchCaptcha = false;
 
+        const targetPage = await target.page();
         const tunnel = new Tunnel(browser.wsEndpoint());
         await tunnel.create();
 
@@ -47,7 +48,7 @@ class Robot extends EventEmitter {
         );
 
         this.emit("error", "Капча", {
-          screenshotPath: await this.screenshot(),
+          screenshotPath: await this.screenshot(targetPage),
           tunnel: tunnel.url,
           captchaTunnel: tunnel.pageUrl(servicePageId)
         });
@@ -86,10 +87,10 @@ class Robot extends EventEmitter {
     this._inited = true;
   }
 
-  async screenshot() {
+  async screenshot(page = this.mainPage) {
     const filePath = tempy.file();
 
-    await this.mainPage.screenshot({
+    await page.screenshot({
       path: filePath,
       type: "jpeg",
       quality: 10,
