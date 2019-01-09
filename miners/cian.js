@@ -39,7 +39,7 @@ class Robot extends EventEmitter {
       if (isCaptcha && watchCaptcha) {
         watchCaptcha = false;
 
-        const tunnel = new Tunnel(this.browser.wsEndpoint());
+        const tunnel = new Tunnel(browser.wsEndpoint());
         await tunnel.create();
 
         await servicePage.goto(
@@ -180,14 +180,14 @@ class Robot extends EventEmitter {
         const offers = await mainPage
           .evaluate(() => window.__serp_data__.results.offers)
           .catch(async error => {
-            const tunnel = new Tunnel(this.browser.wsEndpoint());
-            await tunnel.create();
+            // const tunnel = new Tunnel(this.browser.wsEndpoint());
+            // await tunnel.create();
 
             robot.emit("error", "Не нашли данные по офферам", {
               error,
               screenshotPath: await this.screenshot(),
-              url: mainPage.url(),
-              tunnel: tunnel.url
+              url: mainPage.url()
+              // tunnel: tunnel.url
             });
 
             return [];
