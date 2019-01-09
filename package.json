@@ -12,7 +12,6 @@
     "node": ">=10"
   },
   "scripts": {
-    "preinstall": "# bash ./scripts/preinstall.sh",
     "mine": "node ./miners/index.js",
     "start": "node ./server/index.js",
     "api": "node ./apps/api.js",
