@@ -34,10 +34,12 @@ class Robot extends EventEmitter {
     browser.on("targetchanged", async target => {
       const isCaptcha = /captcha/.test(new URL(target.url()).pathname);
 
+      isCaptcha && console.log("КАПЧА: " + target.url());
+
       if (isCaptcha && watchCaptcha) {
         watchCaptcha = false;
 
-        const tunnel = new Tunnel(this.browser.wsEndpoint(), servicePageId);
+        const tunnel = new Tunnel(this.browser.wsEndpoint());
         await tunnel.create();
 
         await servicePage.goto(
@@ -46,9 +48,8 @@ class Robot extends EventEmitter {
 
         this.emit("error", "Капча", {
           screenshotPath: await this.screenshot(),
-          extra: `Тунель: ${tunnel.url} \nКапча: ${tunnel.pageUrl(
-            servicePageId
-          )}`
+          tunnel: tunnel.url,
+          captchaTunnel: tunnel.pageUrl(servicePageId)
         });
 
         await servicePage.waitForNavigation({ timeout: 0 });
@@ -179,9 +180,14 @@ class Robot extends EventEmitter {
         const offers = await mainPage
           .evaluate(() => window.__serp_data__.results.offers)
           .catch(async error => {
+            const tunnel = new Tunnel(this.browser.wsEndpoint());
+            await tunnel.create();
+
             robot.emit("error", "Не нашли данные по офферам", {
               error,
-              screenshotPath: await this.screenshot()
+              screenshotPath: await this.screenshot(),
+              url: mainPage.url(),
+              tunnel: tunnel.url
             });
 
             return [];
@@ -195,6 +201,8 @@ class Robot extends EventEmitter {
         if (offers.length) {
           yield offers;
         }
+
+        await sleep(5000);
       }
     }
   }
@@ -248,7 +256,7 @@ class Robot extends EventEmitter {
 module.exports = async () => {
   const robot = new Robot();
 
-  robot.on("error", async (msg, { error, screenshotPath, extra }) => {
+  robot.on("error", async (msg, { error, screenshotPath, ...extra }) => {
     await mordobot.sendMessage(`CIAN ROBOT ERROR: ${msg}`);
     if (error) {
       await mordobot.sendMessage(error);
@@ -257,7 +265,11 @@ module.exports = async () => {
       await mordobot.sendPhoto(fs.createReadStream(screenshotPath));
     }
     if (extra) {
-      await mordobot.sendMessage(extra);
+      await mordobot.sendMessage(
+        Object.keys(extra)
+          .map(key => `${key}: ${extra[key]}`)
+          .join("\n")
+      );
     }
     console.error(msg, error);
   });
