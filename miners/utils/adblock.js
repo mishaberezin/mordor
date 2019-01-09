@@ -73,7 +73,10 @@ const blackList = [
   /^https:\/\/static\.ads-twitter\.com/,
   /^https:\/\/.+\.mail\.ru\//
 ];
-const whiteList = [];
+const whiteList = [
+  /^https:\/\/www\.gstatic\.com\/recaptcha/,
+  /^https:\/\/www\.google\.com\/recaptcha/
+];
 
 module.exports = async (page, options = {}) => {
   const bl = [...blackList, ...(options.blackList || [])];

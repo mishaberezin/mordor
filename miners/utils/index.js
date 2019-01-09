@@ -1,4 +1,5 @@
 const adblock = require("./adblock");
+const Tunnel = require("./tunnel");
 
 // Ждет появление элемента с заданным селектором и кликает по нему.
 const waitAndClick = async (page, selector) => {
@@ -27,5 +28,6 @@ module.exports = {
   waitAndClick,
   neverend,
   sleep,
-  adblock
+  adblock,
+  Tunnel
 };

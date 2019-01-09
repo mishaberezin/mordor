@@ -1,4 +1,6 @@
 const fs = require("fs");
+const path = require("path");
+const assert = require("assert").strict;
 const EventEmitter = require("events");
 const config = require("config");
 const range = require("lodash/range");
@@ -7,14 +9,17 @@ const fetch = require("node-fetch");
 const puppeteer = require("puppeteer");
 const retry = require("promise-retry");
 const tempy = require("tempy");
+const flatCache = require("flat-cache");
+
+const cache = flatCache.load("cian", path.resolve(__dirname, "cache"));
 
 const mordobot = require("../lib/mordobot");
-const { sleep, neverend, adblock } = require("./utils");
+const { sleep, neverend, adblock, Tunnel } = require("./utils");
 
 class Robot extends EventEmitter {
   async init() {
     const browser = await puppeteer.launch({
-      // headless: false,
+      headless: false,
       defaultViewport: null,
       args: ["--disable-infobars", '--js-flags="--max-old-space-size=500"'],
       ignoreHTTPSErrors: true
@@ -22,39 +27,103 @@ class Robot extends EventEmitter {
 
     const allPages = await browser.pages();
     const mainPage = allPages[0] || (await browser.newPage());
+    const servicePage = await browser.newPage();
+    const servicePageId = servicePage._target._targetInfo.targetId;
+
+    let watchCaptcha = true;
+    browser.on("targetchanged", async target => {
+      const isCaptcha = /captcha/.test(new URL(target.url()).pathname);
+
+      if (isCaptcha && watchCaptcha) {
+        watchCaptcha = false;
+
+        const tunnel = new Tunnel(this.browser.wsEndpoint(), servicePageId);
+        await tunnel.create();
+
+        await servicePage.goto(
+          "https://www.cian.ru/captcha/?redirect_url=https://www.cian.ru"
+        );
+
+        this.emit("error", "Капча", {
+          screenshotPath: await this.screenshot(),
+          extra: `Тунель: ${tunnel.url} \nКапча: ${tunnel.pageUrl(
+            servicePageId
+          )}`
+        });
+
+        await servicePage.waitForNavigation({ timeout: 0 });
+        tunnel.close();
+        watchCaptcha = true;
+      }
+    });
 
     await adblock(mainPage);
 
-    const regions = await this.getRegions().catch(error => {
+    const regions = await retry(retry =>
+      mainPage
+        .goto("https://www.cian.ru/api/geo/get-districts-tree/?locationId=1")
+        .then(res => res.json())
+        .then(data => {
+          return data.reduce((acc, reg) => {
+            return acc.concat(reg.childs.map(child => child.id));
+          }, []);
+        })
+        .then(result => {
+          cache.setKey("regions", result);
+          cache.save(true);
+          return result;
+        })
+        .catch(retry)
+    ).catch(error => {
       this.emit("error", "Не удалось скачать список регионов", { error });
-      throw error;
+      return cache.getKey("regions");
     });
 
     this.browser = browser;
     this.mainPage = mainPage;
     this.regions = shuffle(regions);
-
-    return this;
+    this._inited = true;
   }
 
-  async getRegions() {
-    return retry(retry =>
-      fetch("https://www.cian.ru/api/geo/get-districts-tree/?locationId=1")
-        .then(data => data.json())
-        .then(regs => {
-          return regs.reduce((acc, reg) => {
-            return acc.concat(reg.childs.map(child => child.id));
-          }, []);
-        })
-        .catch(retry)
-    );
+  async screenshot() {
+    const filePath = tempy.file();
+
+    await this.mainPage.screenshot({
+      path: filePath,
+      type: "jpeg",
+      quality: 10,
+      encoding: "binary"
+    });
+
+    return filePath;
   }
 
   async stop() {
     return this.browser.close();
   }
 
+  async wait() {
+    const originalGoto = this.mainPage.goto;
+
+    this.mainPage.goto = async (...args) => {
+      await this.mainPage.evaluate(() => {
+        window.released = false;
+        window.release = () => {
+          window.released = true;
+        };
+      });
+      await this.mainPage.waitForFunction("window.released", {
+        timeout: 0
+      });
+
+      this.mainPage.goto = originalGoto;
+      return this.mainPage.goto(...args);
+    };
+  }
+
   async mine() {
+    assert.ok(this._inited, "Робот не ициализирован [robot.init()]");
+
     const delay = 20000;
 
     for await (const offers of this.offers()) {
@@ -110,19 +179,9 @@ class Robot extends EventEmitter {
         const offers = await mainPage
           .evaluate(() => window.__serp_data__.results.offers)
           .catch(async error => {
-            const screenshotPath = tempy.file();
-
-            await mainPage.screenshot({
-              path: screenshotPath,
-              type: "jpeg",
-              quality: 1,
-              // fullPage: true,
-              encoding: "binary"
-            });
-
             robot.emit("error", "Не нашли данные по офферам", {
               error,
-              screenshotPath
+              screenshotPath: await this.screenshot()
             });
 
             return [];
@@ -189,10 +248,16 @@ class Robot extends EventEmitter {
 module.exports = async () => {
   const robot = new Robot();
 
-  robot.on("error", async (msg, { error, screenshotPath }) => {
-    await mordobot.sendMessage(`CIAN ROBOT ERROR: ${msg} \n ${error}`);
+  robot.on("error", async (msg, { error, screenshotPath, extra }) => {
+    await mordobot.sendMessage(`CIAN ROBOT ERROR: ${msg}`);
+    if (error) {
+      await mordobot.sendMessage(error);
+    }
     if (screenshotPath) {
       await mordobot.sendPhoto(fs.createReadStream(screenshotPath));
+    }
+    if (extra) {
+      await mordobot.sendMessage(extra);
     }
     console.error(msg, error);
   });
@@ -201,10 +266,10 @@ module.exports = async () => {
     await robot.init();
     await robot.mine();
   } catch (error) {
-    await mordobot.sendMessage(`CIAN ROBOT CRASH: \n ${error}`);
+    await mordobot.sendMessage(`CIAN ROBOT CRASHED: \n ${error}`);
     console.error(error);
     setTimeout(() => {
-      throw error;
+      throw error; // Вызывает перезапуск процесса
     }, 5000);
   }
 };
