@@ -3,6 +3,7 @@ const path = require("path");
 const assert = require("assert").strict;
 const EventEmitter = require("events");
 const config = require("config");
+const noop = require("lodash/noop");
 const range = require("lodash/range");
 const shuffle = require("lodash/shuffle");
 const fetch = require("node-fetch");
@@ -19,7 +20,7 @@ const { sleep, neverend, adblock, Tunnel } = require("./utils");
 class Robot extends EventEmitter {
   async init() {
     const browser = await puppeteer.launch({
-      //headless: false,
+      // headless: false,
       defaultViewport: null,
       args: ["--disable-infobars", '--js-flags="--max-old-space-size=500"'],
       ignoreHTTPSErrors: true
@@ -30,33 +31,40 @@ class Robot extends EventEmitter {
     const servicePage = await browser.newPage();
     const servicePageId = servicePage._target._targetInfo.targetId;
 
-    let watchCaptcha = true;
     browser.on("targetchanged", async target => {
-      const isCaptcha = /captcha/.test(new URL(target.url()).pathname);
+      const isCaptcha = /^https:\/\/www.cian.ru\/captcha/.test(target.url());
 
-      isCaptcha && console.log("КАПЧА: " + target.url());
+      if (!isCaptcha || this.locked) return;
 
-      if (isCaptcha && watchCaptcha) {
-        watchCaptcha = false;
-
+      this.lock(async resolve => {
         const targetPage = await target.page();
+
+        await Promise.all([
+          sleep(5000), // Даем targetPage прогрузиться перед скриншотом
+          servicePage.goto(
+            "https://www.cian.ru/captcha/?redirect_url=https://www.cian.ru"
+          )
+        ]).catch(noop);
+
         const tunnel = new Tunnel(browser.wsEndpoint());
         await tunnel.create();
 
-        await servicePage.goto(
-          "https://www.cian.ru/captcha/?redirect_url=https://www.cian.ru"
-        );
+        const screenshot = await this.screenshot(targetPage);
+        await servicePage.bringToFront(); // Важно для удаленного дебага
 
         this.emit("error", "Капча", {
-          screenshotPath: await this.screenshot(targetPage),
-          tunnel: tunnel.url,
-          captchaTunnel: tunnel.pageUrl(servicePageId)
+          screenshot,
+          "👉": targetPage.url(),
+          "🛠": tunnel.url,
+          "👾": tunnel.pageUrl(servicePageId)
         });
 
+        // Если капча разгадана, страница средиректит
         await servicePage.waitForNavigation({ timeout: 0 });
-        // tunnel.close();
-        watchCaptcha = true;
-      }
+        await servicePage.goto("about:blank");
+        tunnel.close();
+        resolve();
+      });
     });
 
     await adblock(mainPage);
@@ -88,16 +96,23 @@ class Robot extends EventEmitter {
   }
 
   async screenshot(page = this.mainPage) {
-    const filePath = tempy.file();
+    const filepath = tempy.file();
 
     await page.screenshot({
-      path: filePath,
+      path: filepath,
       type: "jpeg",
-      quality: 10,
-      encoding: "binary"
+      quality: 10
     });
 
-    return filePath;
+    return filepath;
+  }
+
+  lock(callback) {
+    this.locked = new Promise(resolve => {
+      callback(resolve);
+    }).finally(() => {
+      this.locked = false;
+    });
   }
 
   async stop() {
@@ -148,6 +163,8 @@ class Robot extends EventEmitter {
     for (const region of neverend(regions)) {
       // На всякий случай больше 100 страниц в выдаче не бывает.
       for (const pageNumber of range(1, 100)) {
+        await this.locked;
+
         const url =
           `https://www.cian.ru/cat.php` +
           `?deal_type=rent&district%5B0%5D=${region}&engine_version=2&offer_type=flat&type=4&p=${pageNumber}`;
@@ -161,16 +178,20 @@ class Robot extends EventEmitter {
               .catch(retry)
           );
         } catch (error) {
-          robot.emit("error", `Не удалось загрузить страницу ${url}`, {
-            error
+          robot.emit("error", `Не удалось загрузить страницу`, {
+            error,
+            "👉": url
           });
           continue;
         }
 
-        const pageParam = new URL(mainPage.url()).searchParams.get("p");
+        const pageUrl = mainPage.url();
+        const pageParam = new URL(pageUrl).searchParams.get("p");
 
         if (pageParam === null) {
-          robot.emit("error", "Не удалось узнать реальный номер страницы");
+          robot.emit("error", "Не удалось узнать реальный номер страницы", {
+            "👉": pageUrl
+          });
           break;
         }
 
@@ -181,14 +202,10 @@ class Robot extends EventEmitter {
         const offers = await mainPage
           .evaluate(() => window.__serp_data__.results.offers)
           .catch(async error => {
-            // const tunnel = new Tunnel(this.browser.wsEndpoint());
-            // await tunnel.create();
-
             robot.emit("error", "Не нашли данные по офферам", {
               error,
-              screenshotPath: await this.screenshot(),
-              url: mainPage.url()
-              // tunnel: tunnel.url
+              screenshot: await this.screenshot(),
+              "👉": mainPage.url()
             });
 
             return [];
@@ -257,29 +274,29 @@ class Robot extends EventEmitter {
 module.exports = async () => {
   const robot = new Robot();
 
-  robot.on("error", async (msg, { error, screenshotPath, ...extra }) => {
-    await mordobot.sendMessage(`CIAN ROBOT ERROR: ${msg}`);
+  robot.on("error", async (title, { error, screenshot, ...extra } = {}) => {
+    const message = [`⛈ CIAN: ${title}`];
+
     if (error) {
-      await mordobot.sendMessage(error);
+      message.push("`" + error + "`");
     }
-    if (screenshotPath) {
-      await mordobot.sendPhoto(fs.createReadStream(screenshotPath));
+    if (screenshot) {
+      await mordobot.sendPhoto(fs.createReadStream(screenshot));
     }
     if (extra) {
       await mordobot.sendMessage(
-        Object.keys(extra)
-          .map(key => `${key}: ${extra[key]}`)
-          .join("\n")
+        Object.keys(extra).map(key => message.push(`${key}: ${extra[key]}`))
       );
     }
-    console.error(msg, error);
+    await mordobot.sendMessage(message.join("\n"));
+    console.error(title, error);
   });
 
   try {
     await robot.init();
     await robot.mine();
   } catch (error) {
-    await mordobot.sendMessage(`CIAN ROBOT CRASHED: \n ${error}`);
+    await mordobot.sendMessage(`🔥 CIAN: Упал \n ${error}`);
     console.error(error);
     setTimeout(() => {
       throw error; // Вызывает перезапуск процесса
