@@ -1,7 +1,8 @@
 const config = require("config");
 const puppeteer = require("puppeteer");
 const db = require("../lib/db");
-const { sleep, adblock } = require("./utils");
+const { sleep, adblocker, chromemod } = require("./utils");
+
 const fetch = require("node-fetch");
 
 class Robot {
@@ -11,35 +12,19 @@ class Robot {
 
   async init() {
     const browser = await puppeteer.launch({
-      headless: true,
+      // headless: false,
       defaultViewport: null,
       args: ["--disable-infobars", '--js-flags="--max-old-space-size=500"'],
       ignoreHTTPSErrors: true
     });
 
+    await chromemod(browser);
+
     // Используем стартовую вкладку, если есть.
     const allPages = await browser.pages();
     const mainPage = allPages[0] || (await browser.newPage());
 
-    // CSS фикс, устойчивый к перезагрузкам.
-    await mainPage.evaluateOnNewDocument(() => {
-      (function fix() {
-        if (!document.head) {
-          setTimeout(fix, 100);
-        } else {
-          document.getElementById("f1xed") ||
-            document.head.insertAdjacentHTML(
-              "beforeend",
-              '<style id="f1xed">' +
-                "#header-user-login-motivation-container" +
-                "{ display: none !important }" +
-                "</style>"
-            );
-        }
-      })();
-    });
-
-    adblock(mainPage);
+    await adblocker(mainPage);
 
     await mainPage.bringToFront();
     await mainPage.goto("https://www.cian.ru/", {
@@ -79,6 +64,7 @@ class Robot {
     const { mainPage } = this;
 
     for await (const url of this.urls()) {
+      await sleep(5000);
       try {
         await mainPage.goto(url, {
           waitUntil: "domcontentloaded"
