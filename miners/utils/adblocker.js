@@ -78,18 +78,15 @@ const whiteList = [
   /^https:\/\/www\.google\.com\/recaptcha/
 ];
 
-module.exports = async (page, options = {}) => {
-  const bl = [...blackList, ...(options.blackList || [])];
-  const wl = [...whiteList, ...(options.whiteList || [])];
-
+const adblock = async page => {
   await page.setRequestInterception(true);
 
   page.on("request", request => {
     const url = request.url();
 
-    if (bl.some(re => re.test(url))) {
+    if (blackList.some(re => re.test(url))) {
       request.abort();
-    } else if (wl.some(re => re.test(url))) {
+    } else if (whiteList.some(re => re.test(url))) {
       request.continue();
     } else if (
       [
@@ -107,4 +104,26 @@ module.exports = async (page, options = {}) => {
       request.continue();
     }
   });
+};
+
+const adblockBrowser = async browser => {
+  const pages = await browser.pages();
+  await Promise.all(pages.map(page => adblock(page)));
+
+  browser.on("targetcreated", async target => {
+    if (target.type() === "page") {
+      adblock(await target.page());
+    }
+  });
+};
+
+module.exports = async guess => {
+  const page = guess.goto ? guess : null;
+  const browser = page ? null : guess;
+
+  if (page) {
+    return adblock(page);
+  } else {
+    return adblockBrowser(browser);
+  }
 };

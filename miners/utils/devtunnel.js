@@ -185,4 +185,55 @@ class Tunnel {
   }
 }
 
-module.exports = Tunnel;
+module.exports = browser => {
+  browser.tunnel = async () => {
+    let tunnel;
+
+    if (browser._tunnel) {
+      tunnel = browser._tunnel;
+    } else {
+      tunnel = new Tunnel(browser.wsEndpoint());
+      await tunnel.create();
+      browser._tunnel = tunnel;
+    }
+
+    return tunnel.url;
+  };
+
+  browser.on("pagecreated", page => {
+    page.tunnel = async () => {
+      if (!browser._tunnel) {
+        await browser.tunnel();
+      }
+
+      const tunnel = browser._tunnel;
+      const pageId = page._target._targetInfo.targetId;
+
+      return tunnel.pageUrl(pageId);
+    };
+  });
+};
+
+const devtunnel = async browser => {
+  if (browser._tunnel) {
+    return browser._tunnel;
+  } else {
+    const tunnel = new Tunnel(browser.wsEndpoint());
+    await tunnel.create();
+    browser._tunnel = tunnel;
+    return tunnel;
+  }
+};
+
+module.exports = async guess => {
+  const page = guess.goto ? guess : null;
+  const browser = page ? await page.browser() : guess;
+  const tunnel = await devtunnel(browser);
+
+  if (page) {
+    const pageId = page._target._targetInfo.targetId;
+    return tunnel.pageUrl(pageId);
+  } else {
+    return tunnel.url;
+  }
+};

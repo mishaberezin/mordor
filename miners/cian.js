@@ -1,4 +1,3 @@
-const fs = require("fs");
 const path = require("path");
 const assert = require("assert").strict;
 const EventEmitter = require("events");
@@ -9,27 +8,37 @@ const shuffle = require("lodash/shuffle");
 const fetch = require("node-fetch");
 const puppeteer = require("puppeteer");
 const retry = require("promise-retry");
-const tempy = require("tempy");
 const flatCache = require("flat-cache");
 
 const cache = flatCache.load("cian", path.resolve(__dirname, "cache"));
 
 const mordobot = require("../lib/mordobot");
-const { sleep, neverend, adblock, Tunnel } = require("./utils");
+
+const {
+  sleep,
+  neverend,
+  adblocker,
+  devtunnel,
+  chromemod,
+  screenshot
+} = require("./utils");
 
 class Robot extends EventEmitter {
   async init() {
     const browser = await puppeteer.launch({
-      // headless: false,
+      headless: false,
       defaultViewport: null,
       args: ["--disable-infobars", '--js-flags="--max-old-space-size=500"'],
       ignoreHTTPSErrors: true
     });
 
+    await chromemod(browser);
+
     const allPages = await browser.pages();
     const mainPage = allPages[0] || (await browser.newPage());
     const servicePage = await browser.newPage();
-    const servicePageId = servicePage._target._targetInfo.targetId;
+
+    await adblocker(mainPage);
 
     browser.on("targetchanged", async target => {
       const isCaptcha = /^https:\/\/www.cian.ru\/captcha/.test(target.url());
@@ -40,34 +49,28 @@ class Robot extends EventEmitter {
         const targetPage = await target.page();
 
         await Promise.all([
-          sleep(5000), // Даем targetPage прогрузиться перед скриншотом
+          sleep(10000), // Даем targetPage прогрузиться перед скриншотом
           servicePage.goto(
             "https://www.cian.ru/captcha/?redirect_url=https://www.cian.ru"
           )
         ]).catch(noop);
 
-        const tunnel = new Tunnel(browser.wsEndpoint());
-        await tunnel.create();
-
-        const screenshot = await this.screenshot(targetPage);
-        await servicePage.bringToFront(); // Важно для удаленного дебага
+        const pageScreenshot = await screenshot(targetPage);
+        await servicePage.bringToFront(); // Вернуть фокус, иначе удаленный дебаг тормозит
 
         this.emit("error", "Капча", {
-          screenshot,
+          "📸": pageScreenshot,
           "👉": targetPage.url(),
-          "🛠": tunnel.url,
-          "👾": tunnel.pageUrl(servicePageId)
+          "🛠": await devtunnel(browser),
+          "👾": await devtunnel(servicePage)
         });
 
         // Если капча разгадана, страница средиректит
         await servicePage.waitForNavigation({ timeout: 0 });
         await servicePage.goto("about:blank");
-        tunnel.close();
         resolve();
       });
     });
-
-    await adblock(mainPage);
 
     const regions = await retry(retry =>
       mainPage
@@ -93,18 +96,6 @@ class Robot extends EventEmitter {
     this.mainPage = mainPage;
     this.regions = shuffle(regions);
     this._inited = true;
-  }
-
-  async screenshot(page = this.mainPage) {
-    const filepath = tempy.file();
-
-    await page.screenshot({
-      path: filepath,
-      type: "jpeg",
-      quality: 10
-    });
-
-    return filepath;
   }
 
   lock(callback) {
@@ -204,7 +195,7 @@ class Robot extends EventEmitter {
           .catch(async error => {
             robot.emit("error", "Не нашли данные по офферам", {
               error,
-              screenshot: await this.screenshot(),
+              "📸": await screenshot(mainPage),
               "👉": mainPage.url()
             });
 
@@ -274,20 +265,16 @@ class Robot extends EventEmitter {
 module.exports = async () => {
   const robot = new Robot();
 
-  robot.on("error", async (title, { error, screenshot, ...extra } = {}) => {
-    const message = [`⛈ CIAN: ${title}`];
+  robot.on("error", async (title, { error, ...extra } = {}) => {
+    const message = [`⛈ CIAN: <b>${title}</b>`];
 
     if (error) {
-      message.push("`" + error + "`");
-    }
-    if (screenshot) {
-      await mordobot.sendPhoto(fs.createReadStream(screenshot));
+      message.push(`<pre>${error}</pre>`);
     }
     if (extra) {
-      await mordobot.sendMessage(
-        Object.keys(extra).map(key => message.push(`${key}: ${extra[key]}`))
-      );
+      Object.keys(extra).forEach(key => message.push(`${key}: ${extra[key]}`));
     }
+
     await mordobot.sendMessage(message.join("\n"));
     console.error(title, error);
   });
@@ -296,7 +283,7 @@ module.exports = async () => {
     await robot.init();
     await robot.mine();
   } catch (error) {
-    await mordobot.sendMessage(`🔥 CIAN: Упал \n ${error}`);
+    await mordobot.sendMessage(`🔥 CIAN: <b>Упал</b> \n <pre>${error}</pre>`);
     console.error(error);
     setTimeout(() => {
       throw error; // Вызывает перезапуск процесса

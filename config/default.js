@@ -1,5 +1,7 @@
 var defer = require("config/defer").deferConfig;
 
+require("dotenv").config(); // .env 🛫
+
 module.exports = {
   db: {
     host: "localhost",
@@ -28,5 +30,15 @@ module.exports = {
         return "";
       }
     })
+  },
+  cloudinary: {
+    host: "api.cloudinary.com",
+    api: defer(({ cloudinary: { host, cloudName } }) => {
+      return {
+        imageUpload: `https://${host}/v1_1/${cloudName}/image/upload`
+      };
+    }),
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    uploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET
   }
 };

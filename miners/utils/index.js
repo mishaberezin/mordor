@@ -1,5 +1,7 @@
-const adblock = require("./adblock");
-const Tunnel = require("./tunnel");
+const adblocker = require("./adblocker");
+const devtunnel = require("./devtunnel");
+const chromemod = require("./chromemod");
+const screenshot = require("./screenshot");
 
 // Ждет появление элемента с заданным селектором и кликает по нему.
 const waitAndClick = async (page, selector) => {
@@ -28,6 +30,8 @@ module.exports = {
   waitAndClick,
   neverend,
   sleep,
-  adblock,
-  Tunnel
+  adblocker,
+  devtunnel,
+  chromemod,
+  screenshot
 };
