@@ -9,7 +9,7 @@ const defaults = {
   },
   min_uptime: 10000,
   max_restarts: 3,
-  log_date_format: "DD-MM-YYYY HH:mm"
+  log_date_format: "DD-MM-YYYY HH:mm:ss"
 };
 
 module.exports = {
@@ -20,8 +20,8 @@ module.exports = {
       ...defaults
     },
     {
-      name: "cian",
-      script: "apps/cian.js",
+      name: "cian_crawler",
+      script: "apps/cian_crawler.js",
       max_memory_restart: "1G",
       ...defaults
     },

@@ -1,8 +1,8 @@
 const { sendReport } = require("../lib/mordobot");
-const { CianChecker } = require("../miners/Cian");
+const { CianCrawler } = require("../miners/Cian");
 
 (async () => {
-  const robot = new CianChecker();
+  const robot = new CianCrawler();
 
   robot.on("error", async (message, extra) => {
     console.error(message, extra.error || "");
