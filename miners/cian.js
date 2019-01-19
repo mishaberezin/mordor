@@ -252,9 +252,13 @@ class CianChecker extends Cian {
 
       for await (const { url } of offers) {
         try {
-          await mainPage.goto(url, {
+          const response = await mainPage.goto(url, {
             waitUntil: "domcontentloaded"
           });
+
+          if (response.status() === 404) {
+            //
+          }
 
           yield await this.page2data(mainPage);
         } catch (e) {
@@ -263,7 +267,7 @@ class CianChecker extends Cian {
             "👉": url
           });
 
-          await sleep(HOUR);
+          await sleep(5000);
           continue;
         }
       }
