@@ -56,7 +56,8 @@ class Tunnel {
 
   async create() {
     const subdomain = this.generateSubdomain();
-    const basicAuth = this.createBasicAuth(this.opts.user, this.opts.pass);
+    // const basicAuth = this.createBasicAuth(this.opts.user, this.opts.pass);
+    const basicAuth = null;
     const serverPort = await getPort(9223); // only preference, will return an available one
 
     this.proxyServer = this._createProxyServer(this.wsHost, this.wsPort);

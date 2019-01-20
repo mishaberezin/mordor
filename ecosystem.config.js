@@ -51,7 +51,7 @@ module.exports = {
       path: "/home/ddml/apt-finder",
       "post-setup": "ls -la",
       "post-deploy":
-        "npm ci && cp ~/.env .env && pm2 startOrReload ecosystem.config.js --env production"
+        "npm ci && cp ~/.env .env && pm2 startOrRestart ecosystem.config.js --env production"
     }
   }
 };
