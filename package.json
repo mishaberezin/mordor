@@ -12,10 +12,6 @@
     "node": ">=10"
   },
   "scripts": {
-    "mine": "node ./miners/index.js",
-    "start": "node ./server/index.js",
-    "api": "node ./apps/api.js",
-    "cian": "node ./apps/cian.js",
     "test": "eslint . && ava",
     "deploy": "pm2 deploy production update"
   },
@@ -108,7 +104,7 @@
     "overrides": [
       {
         "files": [
-          "miners/**/*.js"
+          "bots/**/*.js"
         ],
         "env": {
           "browser": true

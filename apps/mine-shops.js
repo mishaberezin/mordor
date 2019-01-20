@@ -1,4 +1,4 @@
-const mine = require("../miners/mine-shops");
+const mine = require("../bots/mine-shops");
 const db = require("../lib/db");
 
 mine()

@@ -1,5 +1,5 @@
 const { sendReport } = require("../lib/mordobot");
-const { CianCrawler } = require("../miners/cian");
+const { CianCrawler } = require("../bots/cian");
 
 (async () => {
   const robot = new CianCrawler();

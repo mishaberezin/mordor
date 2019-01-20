@@ -17,7 +17,7 @@ const {
   sleep,
   neverend,
   paralyze,
-  adblocker,
+  // adblocker,
   devtunnel,
   chromemod,
   screenshot
@@ -32,7 +32,7 @@ class Cian extends EventEmitter {
 
   get defaults() {
     return {
-      delay: 0
+      delay: 5000
     };
   }
 
@@ -49,7 +49,7 @@ class Cian extends EventEmitter {
     const allPages = await browser.pages();
     const mainPage = allPages[0] || (await browser.newPage());
 
-    await adblocker(mainPage);
+    // await adblocker(mainPage);
 
     browser.on("targetchanged", async target => {
       const targetUrl = target.url();
