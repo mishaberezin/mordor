@@ -263,8 +263,9 @@ class CianChecker extends Cian {
           }
 
           yield await this.page2data(mainPage);
-        } catch (e) {
+        } catch (error) {
           this.emit("error", "Не смогли обработать страницу", {
+            error,
             "📸": await screenshot(mainPage),
             "👉": url
           });
