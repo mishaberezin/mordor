@@ -177,6 +177,9 @@ class CianCrawler extends Cian {
       description: offer.description,
       price: offer.bargainTerms.priceRur,
       phone: `${offer.phones[0].countryCode}${offer.phones[0].number}`,
+      phones: offer.phones.map(
+        ({ countryCode, number }) => `${countryCode}${number}`
+      ),
       metro: Object(offer.geo.undergrounds.filter(u => u.isDefault)[0]).name,
       url: offer.fullUrl,
       isAgent: Object(offer.user).isAgent,
@@ -303,6 +306,9 @@ class CianChecker extends Cian {
       timestamp: Date.now(),
       description: offer.description,
       phone: `${offer.phones[0].countryCode}${offer.phones[0].number}`,
+      phones: offer.phones.map(
+        ({ countryCode, number }) => `${countryCode}${number}`
+      ),
       price: priceChanges[0].priceData.price,
       isAgent: agent.accountType !== null
     };
