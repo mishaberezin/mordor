@@ -47,7 +47,7 @@ module.exports = {
       user: "ddml",
       host: "206.189.9.70",
       ref: "origin/master",
-      repo: "git@bitbucket.org:dedimolya/apt-finder.git",
+      repo: "git@github.com:mishaberezin/mordor.git",
       path: "/home/ddml/apt-finder",
       "post-setup": "ls -la",
       "post-deploy":
