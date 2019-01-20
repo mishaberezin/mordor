@@ -1,6 +1,6 @@
 const path = require("path");
 const EventEmitter = require("events");
-const { getOffersCursor, patchOffer } = require("../lib/db");
+const { getOffersCursor } = require("../lib/db");
 const config = require("config");
 const once = require("lodash/once");
 const range = require("lodash/range");
@@ -253,17 +253,18 @@ class CianChecker extends Cian {
         "url"
       );
 
-      for await (const { _id, url } of offers) {
+      for await (const { url } of offers) {
         try {
-          const response = await mainPage.goto(url, {
+          // const response =
+          await mainPage.goto(url, {
             waitUntil: "domcontentloaded"
           });
 
-          if (response.status() === 404) {
-            await patchOffer(_id, { status: "deleted" });
-            await sleep(5000);
-            continue;
-          }
+          // if (response.status() === 404) {
+          //   await patchOffer(_id, { status: "deleted" });
+          //   await sleep(5000);
+          //   continue;
+          // }
 
           yield await this.page2data(mainPage);
         } catch (error) {
