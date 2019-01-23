@@ -72,7 +72,7 @@ class CianChecker extends Cian {
   }
 
   async page2data(page) {
-    const mapper = ({ offer, agent, priceChanges }) => ({
+    const mapper = ({ offer, agent = {}, priceChanges }) => ({
       sid: "cian",
       status: offer.status === "published" ? "active" : "closed",
       url: page.url(),
