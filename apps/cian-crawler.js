@@ -1,5 +1,6 @@
+const CianCrawler = require("../bots/cian-crawler");
+
 const { sendReport } = require("../lib/mordobot");
-const { CianCrawler } = require("../bots/cian");
 
 (async () => {
   const robot = new CianCrawler();

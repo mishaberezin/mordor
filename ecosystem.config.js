@@ -21,13 +21,13 @@ module.exports = {
     },
     {
       name: "cian_crawler",
-      script: "apps/cian_crawler.js",
+      script: "apps/cian-crawler.js",
       max_memory_restart: "1G",
       ...defaults
     },
     {
       name: "cian_checker",
-      script: "apps/cian_checker.js",
+      script: "apps/cian-checker.js",
       max_memory_restart: "1G",
       ...defaults
     },

@@ -1,5 +1,6 @@
+const CianChecker = require("../bots/cian-checker");
+
 const { sendReport } = require("../lib/mordobot");
-const { CianChecker } = require("../bots/cian");
 
 (async () => {
   const robot = new CianChecker();
@@ -14,7 +15,7 @@ const { CianChecker } = require("../bots/cian");
     await sendReport("🔥 CIAN_CHECKER: <b>Упал</b>", { error });
 
     setTimeout(() => {
-      throw error; // Перезапускает процесс
+      throw error;
     }, 5000);
   });
 })();

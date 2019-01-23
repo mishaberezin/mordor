@@ -27,10 +27,23 @@ const sleep = async ms => {
   await new Promise(resolve => setTimeout(resolve, ms));
 };
 
+const timeloop = ms => {
+  let loop = Promise.resolve();
+  return async () => {
+    const _loop = loop;
+    return loop.then(() => {
+      if (loop === _loop) {
+        loop = sleep(ms);
+      }
+    });
+  };
+};
+
 module.exports = {
   waitAndClick,
   neverend,
   sleep,
+  timeloop,
   paralyze,
   adblocker,
   devtunnel,

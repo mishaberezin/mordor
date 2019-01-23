@@ -1,21 +1,12 @@
-const path = require("path");
 const EventEmitter = require("events");
-const { getOffersCursor } = require("../lib/db");
 const config = require("config");
 const once = require("lodash/once");
-const range = require("lodash/range");
-const shuffle = require("lodash/shuffle");
 const fetch = require("node-fetch");
 const puppeteer = require("puppeteer");
 const retry = require("promise-retry");
 
-const flatCache = require("flat-cache");
-const cacheDir = path.resolve(__dirname, "cache");
-const cache = flatCache.load("cian", cacheDir);
-
 const {
   sleep,
-  neverend,
   paralyze,
   adblocker,
   devtunnel,
@@ -24,21 +15,14 @@ const {
 } = require("./utils");
 
 class Cian extends EventEmitter {
-  constructor(options) {
+  constructor() {
     super();
     this.init = once(this.init);
-    this.options = Object.assign(this.defaults, options);
-  }
-
-  get defaults() {
-    return {
-      delay: 5000
-    };
   }
 
   async init() {
     const browser = await puppeteer.launch({
-      // headless: false,
+      headless: false,
       defaultViewport: null,
       args: ["--disable-infobars", '--js-flags="--max-old-space-size=500"'],
       ignoreHTTPSErrors: true
@@ -53,9 +37,10 @@ class Cian extends EventEmitter {
 
     browser.on("targetchanged", async target => {
       const targetUrl = target.url();
-      const isCaptcha = /^https:\/\/www.cian.ru\/captcha/.test(targetUrl);
 
-      if (!isCaptcha) return;
+      if (this.getUrlInfo(targetUrl).type !== "captcha") {
+        return;
+      }
 
       const targetPage = await target.page();
       paralyze(targetPage, async resolve => {
@@ -79,10 +64,6 @@ class Cian extends EventEmitter {
     this.mainPage = mainPage;
   }
 
-  async stop() {
-    return this.browser.close();
-  }
-
   async mine() {
     await this.init();
 
@@ -94,8 +75,6 @@ class Cian extends EventEmitter {
         .catch(error => {
           this.emit("error", "Не удалось отправить офферы", { error });
         });
-
-      await sleep(this.options.delay);
     }
   }
 
@@ -115,208 +94,44 @@ class Cian extends EventEmitter {
         .catch(retry)
     );
   }
-}
 
-class CianCrawler extends Cian {
-  async *offers() {
-    const mainPage = this.mainPage;
-    const regions = shuffle(await this.getRegions());
-
-    for (const region of neverend(regions)) {
-      // На всякий случай больше 100 страниц в выдаче не бывает.
-      for (const pageNumber of range(1, 100)) {
-        const url =
-          `https://www.cian.ru/cat.php` +
-          `?deal_type=rent&district%5B0%5D=${region}&engine_version=2&offer_type=flat&type=4&p=${pageNumber}`;
-
-        try {
-          await retry(retry =>
-            mainPage
-              .goto(url, {
-                waitUntil: "domcontentloaded"
-              })
-              .catch(retry)
-          );
-        } catch (error) {
-          this.emit("error", `Не удалось загрузить страницу`, {
-            error,
-            "👉": url
-          });
-          continue;
-        }
-
-        const pageUrl = mainPage.url();
-        const pageParam = new URL(pageUrl).searchParams.get("p");
-
-        if (pageParam === null) {
-          this.emit("error", "Не удалось узнать реальный номер страницы", {
-            "👉": pageUrl
-          });
-          break;
-        }
-
-        if (Number(pageParam) !== pageNumber) {
-          break;
-        }
-
-        yield await this.page2data(mainPage);
-      }
-    }
-  }
-
-  async page2data(page) {
-    const mapper = offer => ({
-      sid: "cian",
-      oid: offer.cianId,
-      status: "active",
-      timestamp: Date.now(),
-      totalArea: offer.totalArea,
-      roomsCount: offer.roomsCount,
-      floor: offer.floorNumber,
-      photos: offer.photos.map(photo => photo.fullUrl),
-      description: offer.description,
-      price: offer.bargainTerms.priceRur,
-      phone: `${offer.phones[0].countryCode}${offer.phones[0].number}`,
-      phones: offer.phones.map(
-        ({ countryCode, number }) => `${countryCode}${number}`
-      ),
-      metro: Object(offer.geo.undergrounds.filter(u => u.isDefault)[0]).name,
-      url: offer.fullUrl,
-      isAgent: Object(offer.user).isAgent,
-      address: (offer.geo.address || [])
-        .filter(a => a.geoType !== "district" && a.geoType !== "underground")
-        .map(a => a.name)
-        .join(" ")
-    });
-
-    return await page
-      .evaluate(() => window.__serp_data__.results.offers)
-      .catch(async error => {
-        this.emit("error", "Не нашли данные по офферам", {
-          error,
-          "📸": await screenshot(page),
-          "👉": page.url()
-        });
-
-        return [];
-      })
-      .then(offers => offers.map(mapper))
-      .catch(error => {
-        this.emit("error", "Не удалось смапить офферы", { error });
-        return [];
-      });
-  }
-
-  async getRegions() {
-    const useCache = Math.floor(Math.random() * 10) !== 1;
-
-    if (useCache) {
-      return cache.getKey("regions");
-    }
-
-    return retry(retry =>
-      this.mainPage
-        .goto("https://www.cian.ru/api/geo/get-districts-tree/?locationId=1")
-        .then(res => res.json())
-        .then(data => {
-          return data.reduce((acc, reg) => {
-            return acc.concat(reg.childs.map(child => child.id));
-          }, []);
+  getUrlInfo(url) {
+    const rules = [
+      {
+        test: url => /^https:\/\/www.cian.ru\/captcha/.test(url),
+        info: url => ({
+          type: "captcha"
         })
-        .then(result => {
-          cache.setKey("regions", result);
-          cache.save(true);
-          return result;
-        })
-        .catch(retry)
-    ).catch(error => {
-      this.emit("error", "Не удалось скачать список регионов", { error });
-      return cache.getKey("regions");
-    });
-  }
-}
+      },
+      {
+        test: url => /^https:\/\/www\.cian\.ru\/cat\.php/.test(url),
+        info: url => {
+          const urlObj = new URL(url);
 
-class CianChecker extends Cian {
-  async *offers() {
-    const mainPage = this.mainPage;
-    const HOUR = 1000 * 60 * 60;
-    const getYesterday = () => new Date(Date.now() - HOUR * 24);
-
-    while (true) {
-      const timer = sleep(HOUR);
-      const offers = await getOffersCursor(
-        {
-          sid: "cian",
-          status: "active",
-          checkedAt: { $lt: getYesterday() }
-        },
-        "url"
-      );
-
-      for await (const { url } of offers) {
-        try {
-          // const response =
-          await mainPage.goto(url, {
-            waitUntil: "domcontentloaded"
-          });
-
-          // if (response.status() === 404) {
-          //   await patchOffer(_id, { status: "deleted" });
-          //   await sleep(5000);
-          //   continue;
-          // }
-
-          yield await this.page2data(mainPage);
-        } catch (error) {
-          this.emit("error", "Не смогли обработать страницу", {
-            error,
-            "📸": await screenshot(mainPage),
-            "👉": url
-          });
-
-          await sleep(5000);
-          continue;
+          return {
+            type: "serp",
+            page: Number(urlObj.searchParams.get("p"))
+          };
         }
+      },
+      {
+        test: url => /^https:\/\/www\.cian\.ru\/rent\/flat/.test(url),
+        info: url => ({
+          type: "offer"
+        })
+      },
+      {
+        test: url => true,
+        info: url => ({
+          type: "page"
+        })
       }
+    ];
 
-      await timer;
+    for (const rule of rules) {
+      if (rule.test(url)) return rule.info(url);
     }
   }
-
-  async page2data(page) {
-    const { offer, agent, priceChanges } = await page.evaluate(
-      () =>
-        window._cianConfig["offer-card"].find(
-          item => item.key === "defaultState"
-        ).value.offerData
-    );
-
-    return {
-      sid: "cian",
-      status: offer.status === "published" ? "active" : "closed",
-      url: page.url(),
-      oid: offer.cianId,
-      address: (offer.geo.address || [])
-        .filter(a => a.type !== "district" && a.type !== "underground")
-        .map(a => a.fullName)
-        .join(" "),
-      roomsCount: offer.flatType === "studio" ? 0 : offer.roomsCount,
-      floor: offer.floorNumber,
-      photos: offer.photos.map(p => p.fullUrl),
-      totalArea: offer.totalArea,
-      timestamp: Date.now(),
-      description: offer.description,
-      phone: `${offer.phones[0].countryCode}${offer.phones[0].number}`,
-      phones: offer.phones.map(
-        ({ countryCode, number }) => `${countryCode}${number}`
-      ),
-      price: priceChanges[0].priceData.price,
-      isAgent: agent.accountType !== null
-    };
-  }
 }
 
-module.exports = {
-  CianCrawler,
-  CianChecker
-};
+module.exports = Cian;
