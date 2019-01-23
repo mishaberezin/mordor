@@ -1,11 +1,10 @@
 const http = require("http");
 const httpProxy = require("http-proxy");
-const localtunnel = require("localtunnel");
 
-const httpAuth = require("http-auth");
+const ngrok = require("ngrok");
+
 const modifyResponse = require("http-proxy-response-rewrite");
 const getPort = require("get-port");
-const randomstring = require("randomstring");
 const urlParse = require("url-parse");
 
 /**
@@ -23,89 +22,44 @@ const urlParse = require("url-parse");
  * @ignore
  */
 class Tunnel {
-  constructor(wsUrl, opts = {}) {
-    this.opts = Object.assign(this.defaults, opts);
-    this.wsUrl = wsUrl;
+  constructor(wsurl) {
+    this.wsHost = "localhost";
+    this.wsPort = parseInt(urlParse(wsurl).port);
 
-    const { hostname, port } = urlParse(this.wsUrl);
-
-    this.wsHost = hostname === "127.0.0.1" ? "localhost" : hostname;
-    this.wsPort = port;
-
-    this.server = null;
-    this.tunnel = {};
-    this.tunnelHost = null;
+    return this.init();
   }
 
-  get defaults() {
-    return {
-      user: "admin",
-      pass: "admin"
-    };
+  async init() {
+    const serverPort = parseInt(await getPort());
+
+    this.proxyServer = this.createProxyServer(this.wsHost, this.wsPort);
+    this.localServer = this.createLocalServer(serverPort);
+    this.tunnelUrl = await ngrok.connect(serverPort);
+    this.tunnelHost = urlParse(this.tunnelUrl).hostname;
+
+    return this;
   }
 
   get url() {
-    return this.tunnel.url;
+    return this.tunnelUrl;
   }
 
-  pageUrl(pageId) {
+  pageUrl(id) {
     return `${this.url}/devtools/inspector.html?wss=${
       this.tunnelHost
-    }/devtools/page/${pageId}`;
+    }/devtools/page/${id}`;
   }
 
-  async create() {
-    const subdomain = this.generateSubdomain();
-    // const basicAuth = this.createBasicAuth(this.opts.user, this.opts.pass);
-    const basicAuth = null;
-    const serverPort = await getPort(9223); // only preference, will return an available one
-
-    this.proxyServer = this._createProxyServer(this.wsHost, this.wsPort);
-    this.server = await this._createServer(serverPort, basicAuth);
-    this.tunnel = await this.createTunnel(this.wsHost, serverPort, subdomain);
-    this.tunnelHost = urlParse(this.tunnel.url).hostname;
-
-    return this;
-  }
-
-  close() {
-    this.tunnel.close();
-    this.server.close();
+  async close() {
     this.proxyServer.close();
+    this.localServer.close();
+    await ngrok.disconnect(this.tunnelUrl);
     return this;
-  }
-
-  generateSubdomain() {
-    return randomstring.generate({
-      length: 10,
-      readable: true,
-      capitalization: "lowercase"
-    });
-  }
-
-  createBasicAuth(user, pass) {
-    const basicAuth = httpAuth.basic({}, (username, password, callback) => {
-      const isValid = username === user && password === pass;
-      return callback(isValid);
-    });
-    basicAuth.on("fail", (result, req) => {
-      console.error(`User authentication failed: ${result.user}`);
-    });
-    basicAuth.on("error", (error, req) => {
-      console.error(
-        `Authentication error: ${error.code + " - " + error.message}`
-      );
-    });
-    return basicAuth;
   }
 
   /**
    * `fetch` used by the index page doesn't include credentials by default.
-   *
-   *           LOVELY
-   *           THANKS
-   *             <3
-   *
+
    * @ignore
    */
   _modifyFetchToIncludeCredentials(body) {
@@ -126,9 +80,9 @@ class Tunnel {
     return body;
   }
 
-  _createProxyServer(targetHost = "localhost", targetPort) {
+  createProxyServer(host, port) {
     const proxyServer = new httpProxy.createProxyServer({
-      target: { host: targetHost, port: parseInt(targetPort) }
+      target: { host, port }
     });
     proxyServer.on("proxyReq", (proxyReq, req, res, options) => {
       // https://github.com/GoogleChrome/puppeteer/issues/2242
@@ -155,75 +109,26 @@ class Tunnel {
     return proxyServer;
   }
 
-  async _createServer(port, auth = null) {
-    const server = http.createServer(auth, (req, res) => {
+  createLocalServer(port) {
+    const server = http.createServer((req, res) => {
       this.proxyServer.web(req, res);
     });
     server.on("upgrade", (req, socket, head) => {
       this.proxyServer.ws(req, socket, head);
     });
     server.listen(port);
-    return server;
-  }
 
-  async createTunnel(host, port, subdomain = null) {
-    return new Promise((resolve, reject) => {
-      const tunnel = localtunnel(
-        port,
-        { local_host: host, subdomain },
-        (err, tunnel) => {
-          if (err) {
-            return reject(err);
-          }
-          console.log("tunnel:created", tunnel.url);
-          return resolve(tunnel);
-        }
-      );
-      tunnel.on("close", () => {
-        console.log("tunnel:close");
-      });
-    });
+    return server;
   }
 }
 
-module.exports = browser => {
-  browser.tunnel = async () => {
-    let tunnel;
-
-    if (browser._tunnel) {
-      tunnel = browser._tunnel;
-    } else {
-      tunnel = new Tunnel(browser.wsEndpoint());
-      await tunnel.create();
-      browser._tunnel = tunnel;
-    }
-
-    return tunnel.url;
-  };
-
-  browser.on("pagecreated", page => {
-    page.tunnel = async () => {
-      if (!browser._tunnel) {
-        await browser.tunnel();
-      }
-
-      const tunnel = browser._tunnel;
-      const pageId = page._target._targetInfo.targetId;
-
-      return tunnel.pageUrl(pageId);
-    };
-  });
-};
-
 const devtunnel = async browser => {
-  if (browser._tunnel) {
-    return browser._tunnel;
-  } else {
-    const tunnel = new Tunnel(browser.wsEndpoint());
-    await tunnel.create();
-    browser._tunnel = tunnel;
-    return tunnel;
-  }
+  if (browser._tunnel) return browser._tunnel;
+
+  const tunnel = await new Tunnel(browser.wsEndpoint());
+  browser._tunnel = tunnel;
+
+  return tunnel;
 };
 
 module.exports = async guess => {

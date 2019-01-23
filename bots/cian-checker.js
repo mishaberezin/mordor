@@ -1,6 +1,7 @@
 const Cian = require("./cian");
 const retry = require("promise-retry");
 const { getOffersCursor } = require("../lib/db");
+
 const { screenshot, timeloop, devtunnel } = require("./utils");
 
 class CianChecker extends Cian {
