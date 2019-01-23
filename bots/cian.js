@@ -22,7 +22,7 @@ class Cian extends EventEmitter {
 
   async init() {
     const browser = await puppeteer.launch({
-      headless: false,
+      // headless: false,
       defaultViewport: null,
       args: ["--disable-infobars", '--js-flags="--max-old-space-size=500"'],
       ignoreHTTPSErrors: true
