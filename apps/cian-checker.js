@@ -9,6 +9,10 @@ const { sendReport } = require("../lib/mordobot");
     console.error(message, extra.error || "");
     await sendReport(`⛈ CIAN_CHECKER: <b>${message}</b>`, extra);
   });
+  robot.on("warning", async (message, extra) => {
+    console.error(message);
+    await sendReport(`🌥 CIAN_CHECKER: <b>${message}</b>`, extra);
+  });
 
   await robot.mine().catch(async error => {
     console.error(error);
