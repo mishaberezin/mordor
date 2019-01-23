@@ -2,7 +2,7 @@ const Cian = require("./cian");
 const retry = require("promise-retry");
 const { getOffersCursor } = require("../lib/db");
 
-const { screenshot, timeloop, devtunnel } = require("./utils");
+const { screenshot, timeloop } = require("./utils");
 
 class CianChecker extends Cian {
   async *offers() {
@@ -114,11 +114,9 @@ class CianChecker extends Cian {
       .catch(async error => {
         this.emit("error", "Не удалось смапить данные", {
           error,
-          "📸": await screenshot(page),
-          "👉": page.url(),
-          "👾": await devtunnel(page)
+          "👉": page.url()
         });
-        await new Promise(resolve => {});
+
         return [];
       });
   }
