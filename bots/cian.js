@@ -98,13 +98,13 @@ class Cian extends EventEmitter {
   getUrlInfo(url) {
     const rules = [
       {
-        test: url => /^https:\/\/www.cian.ru\/captcha/.test(url),
+        test: url => /^https?:\/\/(\w+\.)?cian.ru\/captcha/.test(url),
         info: url => ({
           type: "captcha"
         })
       },
       {
-        test: url => /^https:\/\/www\.cian\.ru\/cat\.php/.test(url),
+        test: url => /^https?:\/\/(\w+\.)?cian\.ru\/cat\.php/.test(url),
         info: url => {
           const urlObj = new URL(url);
 
@@ -115,7 +115,7 @@ class Cian extends EventEmitter {
         }
       },
       {
-        test: url => /^https:\/\/www\.cian\.ru\/rent\/flat/.test(url),
+        test: url => /^https?:\/\/(\w+\.)?cian\.ru\/rent\/flat/.test(url),
         info: url => ({
           type: "offer"
         })
