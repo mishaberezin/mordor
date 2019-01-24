@@ -3,11 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "description": "Программа для ЭВМ",
-  "author": "Dedimolya HTML Team",
-  "repository": {
-    "type": "git",
-    "url": "https://bitbucket.org/dedimolya/apt-finder.git"
-  },
+  "author": "Mordor HTML Team",
+  "repository": "github:mishaberezin/mordor",
   "engines": {
     "node": ">=10"
   },
@@ -17,7 +14,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged && npm test"
     }
   },
   "lint-staged": {
