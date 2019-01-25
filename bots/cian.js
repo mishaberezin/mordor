@@ -25,7 +25,7 @@ class Cian extends EventEmitter {
   async init() {
     const udd = await getudd("cian");
     const browser = await puppeteer.launch({
-      headless: false,
+      // headless: false,
       defaultViewport: null,
       args: [
         "--disable-infobars",
