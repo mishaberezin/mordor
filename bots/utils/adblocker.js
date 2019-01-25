@@ -85,7 +85,8 @@ const adblock = async page => {
     const url = request.url();
 
     if (blackList.some(re => re.test(url))) {
-      request.abort();
+      // request.abort();
+      request.continue();
     } else if (whiteList.some(re => re.test(url))) {
       request.continue();
     } else if (
