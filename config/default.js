@@ -1,8 +1,15 @@
-var defer = require("config/defer").deferConfig;
+const path = require("path");
+const defer = require("config/defer").deferConfig;
 
 require("dotenv").config(); // .env 🛫
 
 module.exports = {
+  fs: {
+    prjDir: path.resolve(__dirname, ".."),
+    tmpDir: path.resolve(__dirname, "../tmp"),
+    cacheDir: path.resolve(__dirname, "../tmp/cache"),
+    uddDir: path.resolve(__dirname, "../tmp/udd")
+  },
   db: {
     host: "localhost",
     name: "apt-finder",

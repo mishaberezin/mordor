@@ -1,6 +1,7 @@
 const EventEmitter = require("events");
 const config = require("config");
 const once = require("lodash/once");
+const noop = require("lodash/noop");
 const fetch = require("node-fetch");
 const puppeteer = require("puppeteer");
 const retry = require("promise-retry");
@@ -11,7 +12,8 @@ const {
   adblocker,
   devtunnel,
   chromemod,
-  screenshot
+  screenshot,
+  getudd
 } = require("./utils");
 
 class Cian extends EventEmitter {
@@ -21,11 +23,17 @@ class Cian extends EventEmitter {
   }
 
   async init() {
+    const udd = await getudd("cian");
     const browser = await puppeteer.launch({
-      // headless: false,
+      headless: false,
       defaultViewport: null,
-      args: ["--disable-infobars", '--js-flags="--max-old-space-size=500"'],
-      ignoreHTTPSErrors: true
+      args: [
+        "--disable-infobars",
+        "--disable-session-crashed-bubble",
+        '--js-flags="--max-old-space-size=500"'
+      ],
+      ignoreHTTPSErrors: true,
+      userDataDir: udd.path
     });
 
     await chromemod(browser);
@@ -60,8 +68,18 @@ class Cian extends EventEmitter {
       });
     });
 
+    this.udd = udd;
     this.browser = browser;
     this.mainPage = mainPage;
+  }
+
+  async stop() {
+    try {
+      await this.browser.close().catch(noop);
+      await this.udd.unlock().catch(noop);
+    } catch (error) {
+      return;
+    }
   }
 
   async mine() {

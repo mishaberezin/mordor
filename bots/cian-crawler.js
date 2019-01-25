@@ -1,13 +1,11 @@
 const Cian = require("./cian");
 
-const path = require("path");
 const range = require("lodash/range");
 const shuffle = require("lodash/shuffle");
 const retry = require("promise-retry");
 
-const flatCache = require("flat-cache");
-const cacheDir = path.resolve(__dirname, "cache");
-const cache = flatCache.load("cian", cacheDir);
+const config = require("config");
+const cache = require("flat-cache").load("cian", config.get("fs.cacheDir"));
 
 const { neverend, screenshot, timeloop } = require("./utils");
 
@@ -114,31 +112,29 @@ class CianCrawler extends Cian {
   }
 
   async getRegions() {
-    const useCache = Math.floor(Math.random() * 10) !== 1;
+    return (
+      cache.getKey("regions") ||
+      retry(retry =>
+        this.mainPage
+          .goto("https://www.cian.ru/api/geo/get-districts-tree/?locationId=1")
+          .then(res => res.json())
+          .then(data => {
+            return data.reduce((acc, reg) => {
+              return acc.concat(reg.childs.map(child => child.id));
+            }, []);
+          })
+          .then(result => {
+            cache.setKey("regions", result);
+            cache.save(true);
 
-    if (useCache) {
-      return cache.getKey("regions");
-    }
-
-    return retry(retry =>
-      this.mainPage
-        .goto("https://www.cian.ru/api/geo/get-districts-tree/?locationId=1")
-        .then(res => res.json())
-        .then(data => {
-          return data.reduce((acc, reg) => {
-            return acc.concat(reg.childs.map(child => child.id));
-          }, []);
-        })
-        .then(result => {
-          cache.setKey("regions", result);
-          cache.save(true);
-          return result;
-        })
-        .catch(retry)
-    ).catch(error => {
-      this.emit("error", "Не удалось скачать список регионов", { error });
-      return cache.getKey("regions");
-    });
+            return result;
+          })
+          .catch(retry)
+      ).catch(error => {
+        this.emit("error", "Не удалось скачать список регионов", { error });
+        return [];
+      })
+    );
   }
 }
 

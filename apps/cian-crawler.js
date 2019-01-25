@@ -14,12 +14,18 @@ const { sendReport } = require("../lib/mordobot");
     await sendReport(`🌥 CIAN_CRAWLER: <b>${message}</b>`, extra);
   });
 
-  await robot.mine().catch(async error => {
+  try {
+    await robot.mine();
+  } catch (error) {
     console.error(error);
-    await sendReport("🔥 CIAN_CRAWLER: <b>Упал</b>", { error });
+
+    await Promise.all([
+      await sendReport("🔥 CIAN_CRAWLER: <b>Упал</b>", { error }),
+      await robot.stop()
+    ]);
 
     setTimeout(() => {
-      throw error; // Перезапускает процесс
+      throw error;
     }, 5000);
-  });
+  }
 })();
