@@ -51,7 +51,7 @@ module.exports = {
       path: "/home/ddml/mordor",
       "post-setup": "ls -la",
       "post-deploy":
-        "npm ci && cp ~/.env .env && pm2 startOrRestart ecosystem.config.js --env production"
+        "cp ~/.env .env && rm -fr ./tmp && npm ci && pm2 startOrRestart ecosystem.config.js --env production"
     }
   }
 };
