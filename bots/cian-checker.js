@@ -1,36 +1,28 @@
+const config = require("config");
 const Cian = require("./cian");
 const retry = require("promise-retry");
-const { getOffersCursor } = require("../lib/db");
+const fetch = require("node-fetch");
 
 const { screenshot, timeloop } = require("./utils");
 
 class CianChecker extends Cian {
   async *offers() {
     const mainPage = this.mainPage;
-    const HOUR = 1000 * 60 * 60;
-    const getYesterday = () => new Date(Date.now() - HOUR * 24);
-    const apiCallThrottle = timeloop(HOUR);
+    const apiCallThrottle = timeloop(1000 * 60 * 60);
     const urlCallThrottle = timeloop(5000);
 
     while (true) {
       await apiCallThrottle();
 
-      const offers = await getOffersCursor(
-        {
-          sid: "cian",
-          status: "active",
-          checkedAt: { $lt: getYesterday() }
-        },
-        "url"
-      );
+      const offers = await this.getMissingOffers();
 
-      for await (const { url } of offers) {
+      for (const { url, oid } of offers) {
         await urlCallThrottle();
 
         const response = await retry(retry =>
           mainPage
             .goto(url, {
-              waitUntil: "networkidle2" // dcl недостаточно
+              waitUntil: "networkidle2" // DomCL недостаточно
             })
             .then(response => {
               const { type } = this.getUrlInfo(response.url());
@@ -47,16 +39,17 @@ class CianChecker extends Cian {
         ).catch(error => ({ error }));
 
         const mainPageUrl = mainPage.url();
-        const { type } = this.getUrlInfo(mainPageUrl);
+        const mainPageType = this.getUrlInfo(mainPageUrl).type;
 
         if (response.error) {
-          this.emit("error", `Таймаут или что-то такое`, {
+          this.emit("error", "Таймаут или что-то такое", {
             error: response.error,
-            "👉": url
+            "👉": url,
+            "👈": mainPageUrl
           });
           continue;
-        } else if (type !== "offer") {
-          this.emit("warning", `Cредиректило непонятно куда`, {
+        } else if (mainPageType !== "offer") {
+          this.emit("warning", "Cредиректило непонятно куда", {
             "👉": url,
             "👈": mainPageUrl
           });
@@ -64,7 +57,13 @@ class CianChecker extends Cian {
         } else if (response.ok()) {
           yield await this.page2data(mainPage);
         } else if (response.status() === 404) {
-          // TODO
+          yield {
+            sid: "cian",
+            oid,
+            url: mainPageUrl,
+            status: "deleted",
+            timestamp: Date.now()
+          };
           continue;
         }
       }
@@ -114,11 +113,20 @@ class CianChecker extends Cian {
       .catch(async error => {
         this.emit("error", "Не удалось смапить данные", {
           error,
+          "📸": await screenshot(page),
           "👉": page.url()
         });
 
         return [];
       });
+  }
+
+  async getMissingOffers() {
+    return retry(retry =>
+      fetch(`${config.get("api.url")}/offers/missing/cian`)
+        .then(res => res.json())
+        .catch(retry)
+    );
   }
 }
 

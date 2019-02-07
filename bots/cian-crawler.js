@@ -84,7 +84,6 @@ class CianCrawler extends Cian {
       phones: offer.phones.map(
         ({ countryCode, number }) => `${countryCode}${number}`
       ),
-      metro: Object(offer.geo.undergrounds.filter(u => u.isDefault)[0]).name,
       url: offer.fullUrl,
       isAgent: Object(offer.user).isAgent,
       address: (offer.geo.address || [])

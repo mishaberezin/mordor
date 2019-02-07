@@ -100,7 +100,7 @@ class Cian extends EventEmitter {
     const offers = Array.isArray(offer) ? offer : [offer];
 
     return retry(retry =>
-      fetch(`${config.get("api.url")}/offer`, {
+      fetch(`${config.get("api.url")}/offers`, {
         method: "post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ offers })
