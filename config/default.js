@@ -1,14 +1,15 @@
 const path = require("path");
 const defer = require("config/defer").deferConfig;
+const resolve = (...args) => path.resolve(__dirname, "..", ...args);
 
 require("dotenv").config(); // .env 🛫
 
 module.exports = {
   fs: {
-    prjDir: path.resolve(__dirname, ".."),
-    tmpDir: path.resolve(__dirname, "../tmp"),
-    cacheDir: path.resolve(__dirname, "../tmp/cache"),
-    uddDir: path.resolve(__dirname, "../tmp/udd")
+    prjDir: resolve(),
+    tmpDir: resolve(".tmp"),
+    cacheDir: resolve(".tmp/cache"),
+    uddDir: resolve(".tmp/udd")
   },
   db: {
     host: "localhost",
