@@ -1,5 +1,3 @@
-# Apt-Finder
-
 ## Инсталейшон
 
 🤪 Node.js ≥ 10
@@ -7,14 +5,14 @@
 
 Mac
 
-```
+```sh
 brew install pkg-config cairo libpng jpeg giflib
 npm ci
 ```
 
 Ubuntu
 
-```
+```sh
 sudo apt-get install libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev build-essential g++
 npm ci
 ```
@@ -39,7 +37,7 @@ pm2 deploy production update
 
 Обновить `.env`
 
-```
+```sh
 scp .env ddml@ddml:~
 ```
 

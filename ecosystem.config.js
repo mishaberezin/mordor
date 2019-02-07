@@ -48,7 +48,7 @@ module.exports = {
       host: "206.189.9.70",
       ref: "origin/master",
       repo: "git@github.com:mishaberezin/mordor.git",
-      path: "/home/ddml/apt-finder",
+      path: "/home/ddml/mordor",
       "post-setup": "ls -la",
       "post-deploy":
         "npm ci && cp ~/.env .env && pm2 startOrRestart ecosystem.config.js --env production"

@@ -1,5 +1,5 @@
 {
-  "name": "apt-finder",
+  "name": "mordor",
   "version": "0.0.0",
   "private": true,
   "description": "Программа для ЭВМ",
@@ -29,7 +29,6 @@
     ]
   },
   "license": "UNLICENSED",
-  "homepage": "https://bitbucket.org/dedimolya/apt-finder#readme",
   "dependencies": {
     "@sentry/node": "^4.5.3",
     "body-parser": "^1.18.3",
