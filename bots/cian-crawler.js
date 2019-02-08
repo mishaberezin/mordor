@@ -73,7 +73,11 @@ class CianCrawler extends Cian {
       sid: "cian",
       oid: offer.cianId,
       status: "active",
-      timestamp: Date.now(),
+      address: (offer.geo.address || [])
+        .filter(a => a.type !== "metro")
+        .map(a => a.name)
+        .join(", "),
+      coordinates: offer.geo.coordinates,
       totalArea: offer.totalArea,
       roomsCount: offer.roomsCount,
       floor: offer.floorNumber,
@@ -84,11 +88,8 @@ class CianCrawler extends Cian {
         ({ countryCode, number }) => `${countryCode}${number}`
       ),
       url: offer.fullUrl,
-      isAgent: Object(offer.user).isAgent,
-      address: (offer.geo.address || [])
-        .filter(a => a.geoType !== "district" && a.geoType !== "underground")
-        .map(a => a.name)
-        .join(" ")
+      isAgent: offer.user.isAgent,
+      timestamp: Date.now()
     });
 
     return await page

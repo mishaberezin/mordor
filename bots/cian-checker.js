@@ -77,20 +77,21 @@ class CianChecker extends Cian {
       url: page.url(),
       oid: offer.cianId,
       address: (offer.geo.address || [])
-        .filter(a => a.type !== "district" && a.type !== "underground")
-        .map(a => a.fullName)
-        .join(" "),
+        .filter(a => a.type !== "metro")
+        .map(a => a.name)
+        .join(", "),
+      coordinates: offer.geo.coordinates,
       roomsCount: offer.flatType === "studio" ? 0 : offer.roomsCount,
       floor: offer.floorNumber,
       photos: offer.photos.map(p => p.fullUrl),
       totalArea: offer.totalArea,
-      timestamp: Date.now(),
       description: offer.description,
       phones: offer.phones.map(
         ({ countryCode, number }) => `${countryCode}${number}`
       ),
       price: priceChanges[0].priceData.price,
-      isAgent: agent && agent.accountType !== null
+      isAgent: agent.isPro,
+      timestamp: Date.now()
     });
 
     return await page

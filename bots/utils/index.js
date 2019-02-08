@@ -1,3 +1,4 @@
+const utils = require("../../lib/utils");
 const adblocker = require("./adblocker");
 const devtunnel = require("./devtunnel");
 const chromemod = require("./chromemod");
@@ -16,35 +17,9 @@ const waitAndClick = async (page, selector) => {
   await page.click(selector);
 };
 
-// Позволяет бесконечно итерироваться по массиву,
-// За последним элементом следует первый и т.д.
-const neverend = function*(arr) {
-  for (let i = 0; true; i = (i + 1) % arr.length) {
-    yield arr[i];
-  }
-};
-
-const sleep = async ms => {
-  await new Promise(resolve => setTimeout(resolve, ms));
-};
-
-const timeloop = ms => {
-  let loop = Promise.resolve();
-  return async () => {
-    const _loop = loop;
-    return loop.then(() => {
-      if (loop === _loop) {
-        loop = sleep(ms);
-      }
-    });
-  };
-};
-
 module.exports = {
+  ...utils,
   waitAndClick,
-  neverend,
-  sleep,
-  timeloop,
   paralyze,
   adblocker,
   devtunnel,
