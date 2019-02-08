@@ -80,7 +80,6 @@ class CianCrawler extends Cian {
       photos: offer.photos.map(photo => photo.fullUrl),
       description: offer.description,
       price: offer.bargainTerms.priceRur,
-      phone: `${offer.phones[0].countryCode}${offer.phones[0].number}`,
       phones: offer.phones.map(
         ({ countryCode, number }) => `${countryCode}${number}`
       ),

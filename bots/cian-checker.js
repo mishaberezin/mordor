@@ -86,7 +86,6 @@ class CianChecker extends Cian {
       totalArea: offer.totalArea,
       timestamp: Date.now(),
       description: offer.description,
-      phone: `${offer.phones[0].countryCode}${offer.phones[0].number}`,
       phones: offer.phones.map(
         ({ countryCode, number }) => `${countryCode}${number}`
       ),
