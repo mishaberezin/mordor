@@ -75,7 +75,8 @@ const blackList = [
 ];
 const whiteList = [
   /^https:\/\/www\.gstatic\.com\/recaptcha/,
-  /^https:\/\/www\.google\.com\/recaptcha/
+  /^https:\/\/www\.google\.com\/recaptcha/,
+  /^https:\/\/ysa-static\.passport\.yandex\.ru/
 ];
 
 const adblock = async page => {

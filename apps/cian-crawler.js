@@ -1,6 +1,5 @@
-const CianCrawler = require("../bots/cian-crawler");
-
 const { sendReport } = require("../lib/mordobot");
+const { CianCrawler } = require("../bots/CianCrawler");
 
 (async () => {
   const robot = new CianCrawler();
@@ -25,7 +24,7 @@ const { sendReport } = require("../lib/mordobot");
     ]);
 
     setTimeout(() => {
-      throw error;
+      throw new Error(error.message);
     }, 5000);
   }
 })();

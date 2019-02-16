@@ -1,5 +1,5 @@
 const config = require("config");
-const Cian = require("./cian");
+const Cian = require("./Cian");
 const retry = require("promise-retry");
 const fetch = require("node-fetch");
 
@@ -8,16 +8,16 @@ const { screenshot, timeloop } = require("./utils");
 class CianChecker extends Cian {
   async *offers() {
     const mainPage = this.mainPage;
-    const apiCallThrottle = timeloop(1000 * 60 * 60);
-    const urlCallThrottle = timeloop(5000);
+    const apiCallInterval = timeloop(1000 * 60 * 60);
+    const urlCallInterval = timeloop(5000);
 
     while (true) {
-      await apiCallThrottle();
+      await apiCallInterval();
 
       const offers = await this.getMissingOffers();
 
       for (const { url, oid } of offers) {
-        await urlCallThrottle();
+        await urlCallInterval();
 
         const response = await retry(retry =>
           mainPage
@@ -130,4 +130,4 @@ class CianChecker extends Cian {
   }
 }
 
-module.exports = CianChecker;
+module.exports = { CianChecker };

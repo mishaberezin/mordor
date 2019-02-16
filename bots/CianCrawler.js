@@ -1,4 +1,4 @@
-const Cian = require("./cian");
+const Cian = require("./Cian");
 
 const range = require("lodash/range");
 const shuffle = require("lodash/shuffle");
@@ -13,12 +13,12 @@ class CianCrawler extends Cian {
   async *offers() {
     const mainPage = this.mainPage;
     const regions = shuffle(await this.getRegions());
-    const throttle = timeloop(10000);
+    const interval = timeloop(10000);
 
     for (const region of neverend(regions)) {
-      // На всякий случай больше 100 страниц в выдаче не бывает.
+      // > 100 страниц явная аномалия
       for (const pageNumber of range(1, 100)) {
-        await throttle();
+        await interval();
 
         const url =
           `https://www.cian.ru/cat.php` +
@@ -137,4 +137,4 @@ class CianCrawler extends Cian {
   }
 }
 
-module.exports = CianCrawler;
+module.exports = { CianCrawler };

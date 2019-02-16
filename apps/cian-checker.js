@@ -1,6 +1,5 @@
-const CianChecker = require("../bots/cian-checker");
-
 const { sendReport } = require("../lib/mordobot");
+const { CianChecker } = require("../bots/CianChecker");
 
 (async () => {
   const robot = new CianChecker();
@@ -25,7 +24,7 @@ const { sendReport } = require("../lib/mordobot");
     ]);
 
     setTimeout(() => {
-      throw error;
+      throw new Error(error.message);
     }, 5000);
   }
 })();

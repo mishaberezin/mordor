@@ -22,7 +22,7 @@ module.exports = {
     {
       name: "cian_crawler",
       script: "apps/cian-crawler.js",
-      max_memory_restart: "1G",
+      max_memory_restart: "300M",
       ...defaults
     },
     {
