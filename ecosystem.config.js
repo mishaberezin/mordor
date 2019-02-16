@@ -12,6 +12,17 @@ const defaults = {
   log_date_format: "DD-MM-YYYY HH:mm:ss"
 };
 
+const production = {
+  user: "ddml",
+  host: "206.189.9.70",
+  ref: "origin/master",
+  repo: "git@github.com:mishaberezin/mordor.git",
+  path: "/home/ddml/mordor",
+  "post-setup": "ls -la",
+  "post-deploy":
+    "pm2 stop all && cp ~/.env .env && rm -fr .tmp && npm ci && pm2 reset all && pm2 startOrRestart ecosystem.config.js --env production"
+};
+
 module.exports = {
   apps: [
     {
@@ -49,15 +60,9 @@ module.exports = {
     }
   ],
   deploy: {
-    production: {
-      user: "ddml",
-      host: "206.189.9.70",
-      ref: "origin/master",
-      repo: "git@github.com:mishaberezin/mordor.git",
-      path: "/home/ddml/mordor",
-      "post-setup": "ls -la",
-      "post-deploy":
-        "pm2 stop all && cp ~/.env .env && rm -fr .tmp && npm ci && pm2 reset all && pm2 startOrRestart ecosystem.config.js --env production"
-    }
+    production,
+    production_light: Object.assign(production, {
+      "post-deploy": "pm2 startOrRestart ecosystem.config.js --env production"
+    })
   }
 };
