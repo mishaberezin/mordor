@@ -14,8 +14,8 @@ const {
   paralyze,
   sleep,
   screenshot,
-  devtunnel,
-  adblocker
+  devtunnel
+  //adblocker
 } = require("./utils");
 
 class Realty extends EventEmitter {
@@ -39,7 +39,7 @@ class Realty extends EventEmitter {
     });
 
     await chromemod(browser);
-    await adblocker(browser);
+    // await adblocker(browser);
 
     browser.on("targetchanged", async target => {
       const url = target.url();
