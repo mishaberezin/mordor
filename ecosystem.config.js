@@ -28,7 +28,13 @@ module.exports = {
     {
       name: "cian_checker",
       script: "apps/cian-checker.js",
-      max_memory_restart: "1G",
+      max_memory_restart: "300M",
+      ...defaults
+    },
+    {
+      name: "realty_crawler",
+      script: "apps/realty-crawler.js",
+      max_memory_restart: "300M",
       ...defaults
     },
     {
