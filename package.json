@@ -73,38 +73,5 @@
     "babel": false,
     "compileEnhancements": false,
     "timeout": "10s"
-  },
-  "prettier": {},
-  "eslintConfig": {
-    "extends": [
-      "eslint:recommended",
-      "prettier"
-    ],
-    "env": {
-      "node": true,
-      "es6": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2018
-    },
-    "rules": {
-      "no-console": "off",
-      "no-unused-vars": [
-        "error",
-        {
-          "args": "none"
-        }
-      ]
-    },
-    "overrides": [
-      {
-        "files": [
-          "bots/**/*.js"
-        ],
-        "env": {
-          "browser": true
-        }
-      }
-    ]
   }
 }

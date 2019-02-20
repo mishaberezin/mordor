@@ -1,17 +1,17 @@
 const { sendReport } = require("../lib/mordobot");
-const { RealtyCrawler } = require("../bots/RealtyCrawler");
+const { RealtyChecker } = require("../lib/robots/Realty");
 
 (async () => {
-  const bot = await new RealtyCrawler();
+  const bot = await new RealtyChecker();
 
   bot.on("error", async (message, data) => {
     console.error(message);
     console.error(data.error || "");
-    await sendReport(`⛈ REALTY_CRAWLER: <b>${message}</b>`, data);
+    await sendReport(`⛈ REALTY_CHECKER: <b>${message}</b>`, data);
   });
   bot.on("warning", async (message, data) => {
     console.error(message);
-    await sendReport(`🌥 REALTY_CRAWLER: <b>${message}</b>`, data);
+    await sendReport(`🌥 REALTY_CHECKER: <b>${message}</b>`, data);
   });
 
   try {
@@ -20,7 +20,7 @@ const { RealtyCrawler } = require("../bots/RealtyCrawler");
     console.error(error);
 
     await Promise.all([
-      await sendReport("🔥 REALTY_CRAWLER: <b>Упал</b>", { error }),
+      await sendReport("🔥 REALTY_CHECKER: <b>Упал</b>", { error }),
       await bot.stop()
     ]);
 

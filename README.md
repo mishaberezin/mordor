@@ -17,6 +17,13 @@ sudo apt-get install libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev build-
 npm ci
 ```
 
+## Структура
+
+`/api` http-сервер с ручками
+`/app` процессы, запускаются через pm2
+`/lib` основной нодовый код проекта
+`/config` конфигурация для разных окружений
+
 ## Инструменты
 
 pm2

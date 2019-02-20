@@ -27,35 +27,35 @@ module.exports = {
   apps: [
     {
       name: "api",
-      script: "apps/api.js",
+      script: "app/api.js",
       ...defaults
     },
     {
       name: "cian_crawler",
-      script: "apps/cian-crawler.js",
+      script: "app/cian-crawler.js",
       max_memory_restart: "300M",
       ...defaults
     },
     {
       name: "cian_checker",
-      script: "apps/cian-checker.js",
+      script: "app/cian-checker.js",
       max_memory_restart: "300M",
       ...defaults
     },
     {
       name: "realty_crawler",
-      script: "apps/realty-crawler.js",
+      script: "app/realty-crawler.js",
       max_memory_restart: "300M",
       ...defaults
     },
     {
       name: "digest",
-      script: "apps/digest.js",
+      script: "app/digest.js",
       ...defaults
     },
     {
       name: "report",
-      script: "apps/report.js",
+      script: "app/report.js",
       ...defaults
     }
   ],
