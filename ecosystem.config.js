@@ -1,26 +1,25 @@
 const defaults = {
-  env: {
-    NODE_ENV: "development",
-    NODE_APP_INSTANCE: ""
+  apps: {
+    env: {
+      NODE_ENV: "development",
+      NODE_APP_INSTANCE: ""
+    },
+    env_production: {
+      NODE_ENV: "production",
+      NODE_APP_INSTANCE: ""
+    },
+    min_uptime: 10000,
+    max_restarts: 3,
+    log_date_format: "DD-MM-YYYY HH:mm:ss"
   },
-  env_production: {
-    NODE_ENV: "production",
-    NODE_APP_INSTANCE: ""
-  },
-  min_uptime: 10000,
-  max_restarts: 3,
-  log_date_format: "DD-MM-YYYY HH:mm:ss"
-};
-
-const production = {
-  user: "ddml",
-  host: "206.189.9.70",
-  ref: "origin/master",
-  repo: "git@github.com:mishaberezin/mordor.git",
-  path: "/home/ddml/mordor",
-  "post-setup": "ls -la",
-  "post-deploy":
-    "pm2 stop all && cp ~/.env .env && rm -fr .tmp && npm ci && pm2 reset all && pm2 startOrRestart ecosystem.config.js --env production"
+  deploy: {
+    user: "ddml",
+    host: "206.189.9.70",
+    ref: "origin/master",
+    repo: "git@github.com:mishaberezin/mordor.git",
+    path: "/home/ddml/mordor",
+    "post-setup": "ls -la"
+  }
 };
 
 module.exports = {
@@ -28,41 +27,52 @@ module.exports = {
     {
       name: "api",
       script: "app/api.js",
-      ...defaults
+      ...defaults.apps
     },
     {
       name: "cian_crawler",
       script: "app/cian-crawler.js",
       max_memory_restart: "300M",
-      ...defaults
+      ...defaults.apps
     },
     {
       name: "cian_checker",
       script: "app/cian-checker.js",
       max_memory_restart: "300M",
-      ...defaults
+      ...defaults.apps
     },
     {
       name: "realty_crawler",
       script: "app/realty-crawler.js",
       max_memory_restart: "300M",
-      ...defaults
+      ...defaults.apps
+    },
+    {
+      name: "realty_checker",
+      script: "app/realty-checker.js",
+      max_memory_restart: "300M",
+      ...defaults.apps
     },
     {
       name: "digest",
       script: "app/digest.js",
-      ...defaults
+      ...defaults.apps
     },
     {
       name: "report",
       script: "app/report.js",
-      ...defaults
+      ...defaults.apps
     }
   ],
   deploy: {
-    production,
-    production_light: Object.assign(production, {
+    production: {
+      ...defaults.deploy,
+      "post-deploy":
+        "pm2 stop all && cp ~/.env .env && rm -fr .tmp && npm ci && pm2 reset all && pm2 startOrRestart ecosystem.config.js --env production"
+    },
+    production_light: {
+      ...defaults.deploy,
       "post-deploy": "pm2 startOrRestart ecosystem.config.js --env production"
-    })
+    }
   }
 };
