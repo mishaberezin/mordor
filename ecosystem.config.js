@@ -70,7 +70,7 @@ module.exports = {
       "post-deploy":
         "pm2 stop all && cp ~/.env .env && rm -fr .tmp && npm ci && pm2 reset all && pm2 startOrRestart ecosystem.config.js --env production"
     },
-    production_light: {
+    production_fast: {
       ...defaults.deploy,
       "post-deploy": "pm2 startOrRestart ecosystem.config.js --env production"
     }

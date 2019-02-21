@@ -11,7 +11,7 @@
   "scripts": {
     "test": "eslint . && ava",
     "deploy": "pm2 deploy production update",
-    "deploy-light": "pm2 deploy production_light update"
+    "deploy-fast": "pm2 deploy production_fast update"
   },
   "husky": {
     "hooks": {
