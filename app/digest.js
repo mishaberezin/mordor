@@ -13,15 +13,15 @@ const {
       const offer = fixup(rawOffer);
 
       await updateOffer(offer)
-        .catch(err => {
-          console.error(`Не удалось внести обновление в offer: ${offer._id}`);
-          console.error(err);
+        .catch(error => {
+          console.error(`Не удалось принять новый оффер [${rawOffer._id}]`);
+          console.error(error);
 
-          offer.reason = err.message;
-          return addFailedOffer(offer);
+          rawOffer.reason = error.message;
+          return addFailedOffer(rawOffer);
         })
         .finally(() => {
-          return deleteRawOffer(offer);
+          return deleteRawOffer(rawOffer);
         });
     }
 
