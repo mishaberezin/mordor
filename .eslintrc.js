@@ -19,7 +19,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ["lib/robots/**/*.js"],
+      files: ["lib/bots/**/*.js"],
       env: {
         browser: true
       }

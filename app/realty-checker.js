@@ -1,5 +1,5 @@
 const { sendReport } = require("../lib/mordobot");
-const { RealtyChecker } = require("../lib/robots/Realty");
+const { RealtyChecker } = require("../lib/bots/Realty");
 
 (async () => {
   const bot = await new RealtyChecker();
