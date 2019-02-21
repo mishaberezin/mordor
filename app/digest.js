@@ -1,3 +1,4 @@
+const { sendReport } = require("../lib/mordobot");
 const { fixup } = require("../lib/fixup");
 const { interval } = require("../lib/utils");
 const {
@@ -13,9 +14,13 @@ const {
       const offer = fixup(rawOffer);
 
       await updateOffer(offer)
-        .catch(error => {
+        .catch(async error => {
           console.error(`Не удалось принять новый оффер [${rawOffer._id}]`);
           console.error(error);
+          await sendReport("☝️ DIGEST: Не удалось принять новый оффер", {
+            error,
+            dump: rawOffer
+          });
 
           rawOffer.reason = error.message;
           return addFailedOffer(rawOffer);
