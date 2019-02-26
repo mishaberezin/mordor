@@ -13,7 +13,7 @@ module.exports = {
   },
   db: {
     host: "localhost",
-    name: "apt-finder",
+    name: "apt-finder-test",
     url: defer(({ db: { user, pass, host, name, authSource } }) => {
       if (user && pass) {
         return `mongodb://${user}:${pass}@${host}/${name}?authSource=${authSource}`;
